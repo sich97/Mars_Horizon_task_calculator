@@ -18,7 +18,8 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
             starting_routes.pop()
 
     print(len(starting_routes))
-    if False:
+    # TODO: The turns are missing their commands
+    if True:
         for route in starting_routes:
             print(route)
 
