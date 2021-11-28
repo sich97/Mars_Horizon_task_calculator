@@ -83,7 +83,6 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     navs_amount: int = int(input("Input the amount of navs" + suffix))
     data_amount: int = int(input("Input the amount of data" + suffix))
 
-    # TODO: Missing crew
     starting_resources: dict[str, type(Resource)] = {
         REGULAR_RESOURCE_NAMES["comms"]: Comms(value=comms_amount),
         REGULAR_RESOURCE_NAMES["navs"]: Navs(value=navs_amount),
@@ -98,6 +97,7 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
 def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     """
     TODO: Fill this description and comment/typehint this function
+    TODO: Missing crew
     """
     special_resources: dict[str, type(Resource)] = {}
 
