@@ -186,7 +186,7 @@ class Route:
         self.max_turns: int = max_turns
 
         for starting_resource_name, starting_resource in starting_resources.items():
-            self.current_resources[starting_resource_name]: Resource = starting_resource
+            self.current_resources[starting_resource_name]: type(Resource) = starting_resource
 
         if len(turns) < self.max_turns:
             self.turns: list[Turn] = turns
@@ -211,7 +211,7 @@ class Route:
         """
         if len(self.turns) < self.max_turns:
             self.turns.append(turn)
-            self.current_resources = self.turns[-1].current_resources
+            self.current_resources: dict[str, type(Resource)] = self.turns[-1].current_resources
             return self.is_valid()
         else:
             raise AttributeError(

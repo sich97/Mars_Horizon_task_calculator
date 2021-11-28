@@ -51,7 +51,7 @@ def get_resource(list_of_resources: dict[str, type(Resource)]) -> type(Resource)
         else:
             resource_type: str = get_resource_type()
             resource_amount: int = get_resource_amount()
-            list_of_resources[resource_type] = Resource(resource_type, resource_amount)
+            list_of_resources[resource_type]: type(Resource) = Resource(resource_type, resource_amount)
             return True
 
 
