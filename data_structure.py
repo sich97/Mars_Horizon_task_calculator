@@ -1,3 +1,4 @@
+import itertools
 import random
 
 # TODO: Missing power resource (in the entire local script as well)
@@ -125,10 +126,12 @@ class Turn:
             if len(self.commands) == self.max_commands:
                 return self.apply_end_of_turn_effects()
 
-            # If not room for one more
-            else:
-                raise AttributeError(
-                    "Error when attempting to add command to Turn object beyond its specified max command amount!")
+            return True
+
+        # If not room for one more
+        else:
+            raise AttributeError(
+                "Error when attempting to add command to Turn object beyond its specified max command amount!")
 
     def apply_end_of_turn_effects(self) -> bool:
         """
@@ -172,10 +175,18 @@ class Route:
     current_resources: dict[str, type(Resource)] = {}
     turns: list[Turn] = []
 
-    def __init__(self, turns: list[Turn], max_turns: int):
+    def __init__(self, starting_resources: dict[str, type(Resource)], max_turns: int, turns=None):
+
+        if turns is None:
+            turns = []
+
         self.max_turns: int = max_turns
-        for turn in turns:
-            self.append(turn)
+
+        for starting_resource_name, starting_resource in starting_resources.items():
+            self.current_resources[starting_resource_name]: Resource = starting_resource
+
+        if len(turns) < self.max_turns:
+            self.turns: list[Turn] = turns
 
     def __str__(self) -> str:
         output: str = "[Route]: "
@@ -188,7 +199,7 @@ class Route:
         return len(self.turns)
 
     def copy(self) -> type(__name__):
-        return type(self)(self.turns.copy(), self.max_turns)
+        return type(self)(self.current_resources, self.max_turns, self.turns.copy())
 
     def append(self, turn) -> bool:
         """
@@ -209,14 +220,14 @@ class Route:
                 return False
         return True
 
-    def is_finished(self, objective) -> bool:
+    def is_finished(self, objective: dict[str, type(Resource)]) -> bool:
         return len(self.turns) == self.max_turns and self.satisfies_objective(objective)
 
-    def satisfies_objective(self, objective_resources) -> bool:
+    def satisfies_objective(self, objective: dict[str, type(Resource)]) -> bool:
         """
         TODO: Implement bonus objectives
         """
-        for objective_resource_name, objective_resource_value in objective_resources.items():
+        for objective_resource_name, objective_resource_value in objective.items():
             if not self.current_resources[objective_resource_name].value >= objective_resource_value:
                 return False
         return True
