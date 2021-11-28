@@ -2,6 +2,7 @@ import itertools
 import random
 
 # TODO: Missing power resource (in the entire local script as well)
+# TODO: Missing crew resource as well
 COMMS_NAME: str = "Comms"
 NAVS_NAME: str = "Navs"
 DATA_NAME: str = "Data"
