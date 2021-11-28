@@ -228,7 +228,7 @@ class Route:
 
     def satisfies_objective(self, objective: dict[str, type(Resource)]) -> bool:
         """
-        TODO: Implement bonus objectives
+        TODO: Implement bonus objectives (might be done somewhere else, in the main script for example)
         """
         for objective_resource_name, objective_resource_value in objective.items():
             if not self.current_resources[objective_resource_name].value >= objective_resource_value:
