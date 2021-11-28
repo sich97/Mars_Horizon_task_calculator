@@ -1,71 +1,20 @@
-import itertools
-from data_structure import Command, Turn, Route
+from data_structure import Command, Turn, Route, Resource, Heat, Thrust, Drift, Comms, Navs, Data
 
 
-def calculator(available_commands: list[Command], current_resources: dict[str, int],
-               amount_of_turns: int, amount_of_commands_per_turn: int, objective: dict[str, int]) -> Route:
+def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(Resource)],
+               amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(Resource)]) -> list[Route]:
     """
-    :param available_commands:
-    :param current_resources:
-    :param amount_of_turns:
-    :param amount_of_commands_per_turn:
-    :param objective:
-    :return:
+    # TODO: Complete this function
     """
-    valid_turns: list[Turn] = get_valid_turn(available_commands, current_resources, amount_of_commands_per_turn)
-    test_route = Route([valid_turns[0]], amount_of_turns)
+    starting_routes: list[Route] = []
 
+    # Fill the starting routes list with possible routes from the get-go
+    empty_route: Route = Route(starting_resources, amount_of_turns)
+    possible_turns_from_empty_route: list[Turn] = empty_route.get_possible_turns(available_commands, commands_per_turn)
+    for possible_turn in possible_turns_from_empty_route:
+        starting_routes.append(Route(starting_resources, amount_of_turns))
+        valid = starting_routes[-1].append(possible_turn)
+        if not valid:
+            starting_routes.pop()
 
-def get_valid_turn(available_commands: list[Command], current_resources: dict[str, int],
-                   amount_of_commands: int) -> list[Turn]:
-    """
-    :param available_commands:
-    :param current_resources:
-    :param amount_of_commands:
-    :return:
-    """
-    command_permutations: list[tuple[Command]] = list(itertools.product(available_commands, repeat=amount_of_commands))
-    valid_turns: list[Turn] = filter_command_permutations(command_permutations, current_resources, amount_of_commands)
-    return valid_turns
-
-
-def filter_command_permutations(command_permutations: list[tuple[Command]],
-                                current_resources: dict[str, int], amount_of_commands: int) -> list[Turn]:
-    """
-    :param command_permutations:
-    :param current_resources:
-    :param amount_of_commands:
-    :return:
-    """
-    valid_turns: list[Turn] = []
-
-    for command_permutation in command_permutations:
-
-        proposed_turn: Turn = Turn([], amount_of_commands)
-
-        hypothetical_current_resources = current_resources.copy()
-
-        for command in command_permutation:
-
-            # Subtract resource cost from hypothetical resource pool
-            for resource_cost_type in command.input_resources.keys():
-                hypothetical_current_resources[resource_cost_type] -= command.input_resources[resource_cost_type]
-
-            # If negative resource numbers after subtraction
-            if not all(i >= 0 for i in hypothetical_current_resources.values()):
-                break
-
-            else:
-                # Add resource gain to hypothetical resource pool
-                for resource_gain_type in command.output_resources.keys():
-                    hypothetical_current_resources[resource_gain_type] += command.output_resources[resource_gain_type]
-
-                # Add the valid command to the proposed permutation
-                proposed_turn.append(command)
-
-                # If this was the last command needed for a full turn
-                if len(proposed_turn) == amount_of_commands:
-                    # Add the permutation to the list of valid permutations, together with the result
-                    valid_turns.append(proposed_turn)
-
-    return valid_turns.copy()
+    # TODO: Is this how you wanna do it? I've learned from my mistake and know when to stop coding. This feels like one of those times
