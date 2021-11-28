@@ -63,11 +63,11 @@ class Command:
 
     def copy(self) -> type(__name__):
         input_resources_copy: dict[str, type(Resource)] = {}
-        for input_resource_name, input_resource in self.input_resources:
+        for input_resource_name, input_resource in self.input_resources.items():
             input_resources_copy[input_resource_name]: type(Resource) = input_resource.copy()
 
         output_resources_copy: dict[str, type(Resource)] = {}
-        for output_resource_name, output_resource in self.output_resources:
+        for output_resource_name, output_resource in self.output_resources.items():
             output_resources_copy[output_resource_name]: type(Resource) = output_resource.copy()
 
         return type(self)(self.name, input_resources_copy, output_resources_copy)
@@ -114,7 +114,7 @@ class Turn:
     def copy(self) -> type(__name__):
         commands_copy: list[Command] = [command.copy() for command in self.commands]
         resource_copy: dict[str, type(Resource)] = {}
-        for resource_name, resource in self.current_resources:
+        for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
         return type(self)(resource_copy, self.max_commands, commands_copy)
 
@@ -220,7 +220,7 @@ class Route:
     def copy(self) -> type(__name__):
         turns_copy: list[Turn] = [turn.copy() for turn in self.turns]
         resource_copy: dict[str, type(Resource)] = {}
-        for resource_name, resource in self.current_resources:
+        for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
         return type(self)(resource_copy, self.max_turns, turns_copy)
 
