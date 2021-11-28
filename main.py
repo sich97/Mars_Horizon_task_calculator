@@ -1,119 +1,85 @@
 from task_calculator import calculator
-from data_structure import Command, Turn, Route
+from data_structure import Command, Route, Resource,\
+    COMMS_NAME, NAVS_NAME, DATA_NAME, HEAT_NAME, DRIFT_NAME, THRUST_NAME
 
 AVAILABLE_RESOURCE_TYPES = [
-    "Communication",
-    "Navigation",
-    "Data",
-    "Power"
+    COMMS_NAME,
+    NAVS_NAME,
+    DATA_NAME,
+    HEAT_NAME,
+    DRIFT_NAME,
+    THRUST_NAME,
 ]
 
-DEBUG = True
+DEBUG = False
 
 
-def main():
+def main() -> None:
     if not DEBUG:
-        available_commands = []
+        available_commands: dict[str, Command] = {}
 
         while True:
             user_action = input("Input another command? [Y/n]: ")
             if user_action.lower() == "n":
                 break
             else:
-                available_commands.append(get_new_command())
+                get_new_command(available_commands)
 
-        current_resources = {}
-        update_current_resources(current_resources)
+        current_resources: dict[str, type(Resource)] = {}
 
-        amount_of_turns = int(input("Enter how many turns for this task: "))
-        amount_of_commands_per_turn = int(input("Enter how many commands per turn: "))
+        amount_of_turns: int = int(input("Enter how many turns for this task: "))
+        amount_of_commands_per_turn: int = int(input("Enter how many commands per turn: "))
 
-        objective = get_objective()
+        objective: dict[str, type(Resource)] = get_objective()
 
-        optimal_route: Route = calculator(available_commands, current_resources, amount_of_turns,
-                                          amount_of_commands_per_turn, objective)
-
-    else:
-        optimal_route: Route = calculator([
-            Command("Comms_and_nav_to_data", {AVAILABLE_RESOURCE_TYPES[0]: 3, AVAILABLE_RESOURCE_TYPES[1]: 2},
-                    {AVAILABLE_RESOURCE_TYPES[2]: 8}),
-            Command("Data_to_comms_and_nav", {AVAILABLE_RESOURCE_TYPES[2]: 3},
-                    {AVAILABLE_RESOURCE_TYPES[0]: 4, AVAILABLE_RESOURCE_TYPES[1]: 3}),
-            Command("Power_to_comms", {AVAILABLE_RESOURCE_TYPES[3]: 1},
-                    {AVAILABLE_RESOURCE_TYPES[0]: 2}),
-            Command("Power_to_data", {AVAILABLE_RESOURCE_TYPES[3]: 2},
-                    {AVAILABLE_RESOURCE_TYPES[2]: 4}),
-        ],
-            {AVAILABLE_RESOURCE_TYPES[0]: 0, AVAILABLE_RESOURCE_TYPES[1]: 0, AVAILABLE_RESOURCE_TYPES[2]: 0,
-             AVAILABLE_RESOURCE_TYPES[3]: 8},
-            2,
-            4,
-            {AVAILABLE_RESOURCE_TYPES[0]: 8, AVAILABLE_RESOURCE_TYPES[1]: 8}
-        )
-
-    print("The optimal route is: ")
-    print(optimal_route)
+        possible_routes: list[Route] = calculator(available_commands, current_resources, amount_of_turns,
+                                                  amount_of_commands_per_turn, objective)
 
 
-def get_objective():
-    objective = {}
-    while True:
-        user_action = input("Input another objective resource? [Y/n]: ")
-        if user_action.lower() == "n":
-            break
-        else:
-            resource_type = get_resource_type()
-            resource_amount = get_resource_amount()
-            objective[resource_type] = resource_amount
+def get_objective() -> dict[str, type(Resource)]:
+    objective: dict[str, type(Resource)] = {}
+    get_resource(objective)
 
     return objective
 
 
-def update_current_resources(current_resources):
-    for resource in AVAILABLE_RESOURCE_TYPES:
-        current_resources[resource] = int(input("How many of the following resource do you currently have? ["
-                                                + resource.upper() + "]: "))
-
-
-def get_new_command():
-    command_name = input("Please input the command name: ")
-
-    command_resources_in = {}
+def get_resource(list_of_resources: dict[str, type(Resource)]) -> type(Resource):
     while True:
-        user_action = input("Input another IN resource? [Y/n]: ")
+        user_action: str = input("Input another IN resource? [Y/n]: ")
         if user_action.lower() == "n":
             break
         else:
-            resource_type = get_resource_type()
-            resource_amount = get_resource_amount()
-            command_resources_in[resource_type] = resource_amount
-
-    command_resources_out = {}
-    while True:
-        user_action = input("Input another OUT resource? [Y/n]: ")
-        if user_action.lower() == "n":
-            break
-        else:
-            resource_type = get_resource_type()
-            resource_amount = get_resource_amount()
-            command_resources_out[resource_type] = resource_amount
-
-    return Command(command_name, command_resources_in, command_resources_out)
+            resource_type: str = get_resource_type()
+            resource_amount: int = get_resource_amount()
+            list_of_resources[resource_type] = Resource(resource_type, resource_amount)
+            return True
 
 
-def get_resource_type():
+def get_new_command(available_commands: dict[str, Command]) -> None:
+    command_name: str = input("Please input the command name: ")
+
+    command_resources_in: dict[str, type(Resource)] = {}
+    get_resource(command_resources_in)
+
+    command_resources_out: dict[str, type(Resource)] = {}
+    get_resource(command_resources_out)
+
+    available_commands[command_name]: Command = Command(command_name, command_resources_in, command_resources_out)
+
+
+def get_resource_type() -> str:
     list_available_resource_types()
-    chosen_resource_type =\
+    chosen_resource_type: str =\
         AVAILABLE_RESOURCE_TYPES[int(input("Type the number associated with the resource type: ")) - 1]
     return chosen_resource_type
 
 
-def get_resource_amount():
+def get_resource_amount() -> int:
     return int(input("Please enter the amount: "))
 
 
-def list_available_resource_types():
-    output_string = ""
+def list_available_resource_types() -> None:
+    output_string: str = ""
     for i in range(len(AVAILABLE_RESOURCE_TYPES)):
         output_string += str(i+1) + ":\t" + AVAILABLE_RESOURCE_TYPES[i] + "\n"
     print(output_string)
