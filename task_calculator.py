@@ -17,6 +17,11 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
         if not valid:
             starting_routes.pop()
 
+    print(len(starting_routes))
+    if False:
+        for route in starting_routes:
+            print(route)
+
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
         valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)

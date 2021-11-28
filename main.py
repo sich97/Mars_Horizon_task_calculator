@@ -60,7 +60,7 @@ def main() -> None:
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(),
             REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power()
+            REGULAR_RESOURCE_NAMES["power"]: Power(value=0)
         }
 
     if not DEBUG:
