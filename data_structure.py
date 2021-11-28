@@ -62,7 +62,15 @@ class Command:
         return remove_trailing_newlines(output)
 
     def copy(self) -> type(__name__):
-        return type(self)(self.name, self.input_resources.copy(), self.output_resources.copy())
+        input_resources_copy: dict[str, type(Resource)] = {}
+        for input_resource_name, input_resource in self.input_resources:
+            input_resources_copy[input_resource_name]: type(Resource) = input_resource.copy()
+
+        output_resources_copy: dict[str, type(Resource)] = {}
+        for output_resource_name, output_resource in self.output_resources:
+            output_resources_copy[output_resource_name]: type(Resource) = output_resource.copy()
+
+        return type(self)(self.name, input_resources_copy, output_resources_copy)
 
 
 class Turn:
@@ -104,7 +112,11 @@ class Turn:
         return len(self.commands)
 
     def copy(self) -> type(__name__):
-        return type(self)(self.current_resources.copy(), self.max_commands, commands=self.commands.copy())
+        commands_copy: list[Command] = [command.copy() for command in self.commands]
+        resource_copy: dict[str, type(Resource)] = {}
+        for resource_name, resource in self.current_resources:
+            resource_copy[resource_name]: type(Resource) = resource.copy()
+        return type(self)(resource_copy, self.max_commands, commands_copy)
 
     def append(self, command: Command) -> bool:
         """
@@ -190,10 +202,10 @@ class Route:
         self.max_turns: int = max_turns
 
         for starting_resource_name, starting_resource in starting_resources.items():
-            self.current_resources[starting_resource_name]: type(Resource) = starting_resource
+            self.current_resources[starting_resource_name]: type(Resource) = starting_resource.copy()
 
         if len(turns) < self.max_turns:
-            self.turns: list[Turn] = turns
+            self.turns: list[Turn] = turns.copy()
 
     def __str__(self) -> str:
         output: str = "[Route]: "
@@ -206,7 +218,11 @@ class Route:
         return len(self.turns)
 
     def copy(self) -> type(__name__):
-        return type(self)(self.current_resources, self.max_turns, self.turns.copy())
+        turns_copy: list[Turn] = [turn.copy() for turn in self.turns]
+        resource_copy: dict[str, type(Resource)] = {}
+        for resource_name, resource in self.current_resources:
+            resource_copy[resource_name]: type(Resource) = resource.copy()
+        return type(self)(resource_copy, self.max_turns, turns_copy)
 
     def append(self, turn) -> bool:
         """
@@ -214,7 +230,7 @@ class Route:
         Updates the Route's current_resources to the specified turn's current_resources.
         """
         if len(self.turns) < self.max_turns:
-            self.turns.append(turn)
+            self.turns.append(turn.copy())
             self.current_resources: dict[str, type(Resource)] = self.turns[-1].current_resources
             return self.is_valid()
         else:
@@ -310,6 +326,9 @@ class Heat(Resource):
         """
         return self.is_valid_value and self.value < self.overheat_limit
 
+    def copy(self) -> type(__name__):
+        return Heat(self.overheat_limit, self.min_random_increase, self.max_random_increase, value=self.value)
+
 
 class Drift(Resource):
     """
@@ -330,6 +349,9 @@ class Drift(Resource):
         # TODO: Does the game care at all about drift before the very end?
         """
         return self.drift_bounds[0] <= self.value <= self.drift_bounds[1]
+
+    def copy(self) -> type(__name__):
+        return Drift(self.drift_bounds.copy(), self.min_value, self.max_value, value=self.value)
 
 
 class Thrust(Resource):
@@ -357,6 +379,9 @@ class Thrust(Resource):
         """
         return self.is_valid_value() and self.value >= self.required_thrust
 
+    def copy(self) -> type(__name__):
+        return Thrust(self.max_value, self.required_thrust, value=self.value)
+
 
 class Comms(Resource):
     """
@@ -371,6 +396,9 @@ class Comms(Resource):
 
     def is_valid_end_of_route(self) -> bool:
         return self.is_valid_value()
+
+    def copy(self) -> type(__name__):
+        return Comms(value=self.value)
 
 
 class Navs(Resource):
@@ -387,6 +415,9 @@ class Navs(Resource):
     def is_valid_end_of_route(self) -> bool:
         return self.is_valid_value()
 
+    def copy(self) -> type(__name__):
+        return Navs(value=self.value)
+
 
 class Data(Resource):
     """
@@ -402,6 +433,9 @@ class Data(Resource):
     def is_valid_end_of_route(self) -> bool:
         return self.is_valid_value()
 
+    def copy(self) -> type(__name__):
+        return Data(value=self.value)
+
 
 class Power(Resource):
     """
@@ -416,6 +450,9 @@ class Power(Resource):
 
     def is_valid_end_of_route(self) -> bool:
         return self.is_valid_value()
+
+    def copy(self) -> type(__name__):
+        return Power(value=self.value)
 
 
 def indent_string(string: str) -> str:
