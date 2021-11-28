@@ -2,14 +2,18 @@ import itertools
 import random
 
 # TODO: Missing power resource (in the entire local script as well)
-# TODO: Missing crew resource as well
-COMMS_NAME: str = "Comms"
-NAVS_NAME: str = "Navs"
-DATA_NAME: str = "Data"
+REGULAR_RESOURCE_NAMES = {
+    "comms": "Comms",
+    "navs": "Navs",
+    "data": "Data"
+}
 
-HEAT_NAME: str = "Heat"
-DRIFT_NAME: str = "Drift"
-THRUST_NAME: str = "Thrust"
+# TODO: Missing crew resource as well
+SPECIAL_RESOURCE_NAMES = {
+    "heat": "Heat",
+    "drift": "Drift",
+    "thrust": "Thrust"
+}
 
 
 class Resource:
@@ -280,8 +284,8 @@ class Heat(Resource):
     min_random_increase: int
     max_random_increase: int
 
-    def __init__(self, overheat_limit: int, min_increase: int, max_increase: int):
-        super().__init__(HEAT_NAME, max_value=overheat_limit)
+    def __init__(self, overheat_limit: int, min_increase: int, max_increase: int, value: int = 0):
+        super().__init__(SPECIAL_RESOURCE_NAMES["heat"], max_value=overheat_limit, value=value)
         self.overheat_limit: int = overheat_limit
         self.min_random_increase: int = min_increase
         self.max_random_increase: int = max_increase
@@ -313,8 +317,8 @@ class Drift(Resource):
     """
     drift_bounds: list[int]
 
-    def init(self, drift_bounds: list[int], min_drift: int, max_drift: int):
-        super().__init__(DRIFT_NAME, min_value=min_drift, max_value=max_drift)
+    def __init__(self, drift_bounds: list[int], min_drift: int, max_drift: int, value: int = 0):
+        super().__init__(SPECIAL_RESOURCE_NAMES["drift"], min_value=min_drift, max_value=max_drift, value=value)
         self.drift_bounds = drift_bounds
 
     def next_turn(self) -> bool:
@@ -334,8 +338,8 @@ class Thrust(Resource):
     """
     required_thrust: int
 
-    def init(self, max_thrust: int, required_thrust: int):
-        super().__init__(THRUST_NAME, max_value=max_thrust)
+    def __init__(self, max_thrust: int, required_thrust: int, value: int = 0):
+        super().__init__(SPECIAL_RESOURCE_NAMES["thrust"], max_value=max_thrust, value=value)
         self.required_thrust = required_thrust
 
     def next_turn(self) -> bool:
@@ -359,8 +363,8 @@ class Comms(Resource):
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
     """
-    def __init__(self):
-        super().__init__(COMMS_NAME)
+    def __init__(self, value: int = 0):
+        super().__init__(REGULAR_RESOURCE_NAMES["comms"], value=value)
 
     def next_turn(self) -> bool:
         return self.is_valid_value()
@@ -374,8 +378,8 @@ class Navs(Resource):
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
     """
-    def __init__(self):
-        super().__init__(NAVS_NAME)
+    def __init__(self, value: int = 0):
+        super().__init__(REGULAR_RESOURCE_NAMES["navs"], value=value)
 
     def next_turn(self) -> bool:
         return self.is_valid_value()
@@ -389,8 +393,8 @@ class Data(Resource):
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
     """
-    def __init__(self):
-        super().__init__(DATA_NAME)
+    def __init__(self, value: int = 0):
+        super().__init__(REGULAR_RESOURCE_NAMES["data"], value=value)
 
     def next_turn(self) -> bool:
         return self.is_valid_value()
