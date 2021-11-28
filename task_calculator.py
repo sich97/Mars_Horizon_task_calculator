@@ -4,7 +4,7 @@ from data_structure import Command, Turn, Route, Resource
 def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(Resource)],
                amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(Resource)]) -> list[Route]:
     """
-    # TODO: Complete this function
+    TODO: Fill this description and comment/typehint this function
     """
     starting_routes: list[Route] = []
 
@@ -26,6 +26,9 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
 
 def get_next_turn_routes(previous_turn_routes: list[Route], available_commands: dict[str, Command],
                          commands_per_turn: int) -> list[Route]:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
 
     valid_routes: list[Route] = []
     for route in previous_turn_routes:

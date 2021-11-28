@@ -6,6 +6,9 @@ DEBUG = True
 
 
 def main() -> None:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
     if not DEBUG:
         available_commands: dict[str, Command] = {}
 
@@ -72,6 +75,9 @@ def main() -> None:
 
 
 def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
     # TODO: Missing power
     comms_amount: int = int(input("Input the amount of comms" + suffix))
     navs_amount: int = int(input("Input the amount of navs" + suffix))
@@ -90,6 +96,9 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
 
 
 def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
     special_resources: dict[str, type(Resource)] = {}
 
     user_action: str = input("Would you like to add a special resource? [Y/n]: ")
@@ -130,6 +139,9 @@ def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
 
 
 def get_new_command(available_commands: dict[str, Command]) -> None:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
     command_name: str = input("Please input the command name: ")
 
     command_resources_in: dict[str, type(Resource)] = get_resources(" the command consumes: ")
@@ -140,6 +152,9 @@ def get_new_command(available_commands: dict[str, Command]) -> None:
 
 
 def list_available_resource_types(list_of_names: dict[str, str]) -> None:
+    """
+    TODO: Fill this description and comment/typehint this function
+    """
     output_string: str = ""
     for resource_type_index in range(len(list_of_names.items())):
         output_string += str(resource_type_index) + ": " + list(list_of_names.items())[resource_type_index][1] + "\n"
