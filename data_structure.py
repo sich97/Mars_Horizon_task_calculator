@@ -45,15 +45,19 @@ class Command:
     """
 
     name: str
-    input_resources: dict[str, type(Resource)]
-    output_resources: dict[str, type(Resource)]
+    input_resources: dict[str, type(Resource)] = {}
+    output_resources: dict[str, type(Resource)] = {}
 
     def __init__(self, name: str,
                  input_resources: dict[str, type(Resource)], output_resources: dict[str, type(Resource)]):
 
         self.name: str = name
-        self.input_resources: dict[str, type(Resource)] = input_resources.copy()
-        self.output_resources: dict[str, type(Resource)] = output_resources.copy()
+
+        for input_resource_name, input_resource in input_resources.items():
+            self.input_resources[input_resource_name]: type(Resource) = input_resource.copy()
+
+        for output_resource_name, output_resource in output_resources.items():
+            self.output_resources[output_resource_name]: type(Resource) = output_resource.copy()
 
     def __str__(self) -> str:
         output: str = self.name + " [Command]" + "\n\t" \
@@ -96,10 +100,10 @@ class Turn:
         self.max_commands: int = max_commands
 
         for starting_resource_name, starting_resource in starting_resources.items():
-            self.current_resources[starting_resource_name]: Resource = starting_resource
+            self.current_resources[starting_resource_name]: Resource = starting_resource.copy()
 
         if len(commands) < self.max_commands:
-            self.commands: list[Command] = commands
+            self.commands: list[Command] = [command.copy() for command in commands]
 
     def __str__(self) -> str:
         output: str = "[Turn]: "
@@ -129,14 +133,14 @@ class Turn:
         if len(self.commands) < self.max_commands:
 
             # Append command
-            self.commands.append(command)
+            self.commands.append(command.copy())
 
             # Apply changes to resource pool (current_resources)
-            for resource_name, resource in command.input_resources.items():
+            for resource_name, resource in self.commands[-1].input_resources.items():
                 self.current_resources[resource_name].value += resource.value
                 if not self.current_resources[resource_name].is_valid_value():
                     return False
-            for resource_name, resource in command.output_resources.items():
+            for resource_name, resource in self.commands[-1].output_resources.items():
                 self.current_resources[resource_name].value += resource.value
                 if not self.current_resources[resource_name].is_valid_value():
                     return False
