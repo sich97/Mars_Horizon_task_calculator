@@ -221,11 +221,40 @@ class Route:
                 return False
         return True
 
-    def get_possible_turns(self) -> list[Turn]:
+    def get_possible_turns(self, available_commands: dict[str, Command], commands_per_turn: int) -> list[Turn]:
         """
-        TODO: Create this function
+        Starts off by generating a list of permutations based on available commands.
+        Then tests all permutations for validity (through the Turn class' built-in validity checks when appending).
+        Adds all valid permutations to the list of possible turns.
         """
-        pass
+        possible_turns: list[Turn] = []
+
+        # Get all the permutations of the commands in this task
+        command_permutations: list[tuple[Command]] =\
+            list(itertools.product(available_commands.values(), repeat=commands_per_turn))
+
+        # Loop through each permutation
+        for command_permutation in command_permutations:
+
+            # Create a hypothetical turn object based on the Route's current_resources
+            hypothetical_resource_pool: dict[str, type(Resource)] = self.current_resources.copy()
+            hypothetical_turn: Turn = Turn(hypothetical_resource_pool, commands_per_turn)
+
+            # Loop through each command in the current permutation
+            for command in command_permutation:
+
+                # If appending the command to the hypothetical turn, this permutation is invalid, so we discard it.
+                if not hypothetical_turn.append(command):
+                    break
+
+                # If it succeeds, we can move on to try appending the next command in the permutation,
+                # except if the hypothetical turn has reached its required amount of commands, in which case the entire
+                # permutation is valid, so we'll add it to the possible_turns list.
+                else:
+                    if len(hypothetical_turn) == commands_per_turn:
+                        possible_turns.append(hypothetical_turn.copy())
+
+        return possible_turns
 
 
 class Heat(Resource):
