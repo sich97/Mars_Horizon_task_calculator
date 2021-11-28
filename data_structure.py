@@ -41,13 +41,15 @@ class Command:
     """
 
     name: str
-    input_resources: dict[str, int]
-    output_resources: dict[str, int]
+    input_resources: dict[str, type(Resource)]
+    output_resources: dict[str, type(Resource)]
 
-    def __init__(self, name: str, input_resources: dict[str, int], output_resources: dict[str, int]):
+    def __init__(self, name: str,
+                 input_resources: dict[str, type(Resource)], output_resources: dict[str, type(Resource)]):
+
         self.name: str = name
-        self.input_resources: dict[str, int] = input_resources.copy()
-        self.output_resources: dict[str, int] = output_resources.copy()
+        self.input_resources: dict[str, type(Resource)] = input_resources.copy()
+        self.output_resources: dict[str, type(Resource)] = output_resources.copy()
 
     def __str__(self) -> str:
         output: str = self.name + " [Command]" + "\n\t" \
@@ -114,12 +116,12 @@ class Turn:
             self.commands.append(command)
 
             # Apply changes to resource pool (current_resources)
-            for resource_name, resource_value in command.input_resources.items():
-                self.current_resources[resource_name].value += resource_value
+            for resource_name, resource in command.input_resources.items():
+                self.current_resources[resource_name].value += resource.value
                 if not self.current_resources[resource_name].is_valid_value():
                     return False
-            for resource_name, resource_value in command.output_resources.items():
-                self.current_resources[resource_name].value += resource_value
+            for resource_name, resource in command.output_resources.items():
+                self.current_resources[resource_name].value += resource.value
                 if not self.current_resources[resource_name].is_valid_value():
                     return False
 
