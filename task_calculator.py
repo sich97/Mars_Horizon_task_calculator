@@ -1,4 +1,4 @@
-from data_structure import Command, Turn, Route, Resource, Heat, Thrust, Drift, Comms, Navs, Data
+from data_structure import Command, Turn, Route, Resource
 
 
 def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(Resource)],
@@ -17,4 +17,22 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
         if not valid:
             starting_routes.pop()
 
-    # TODO: Is this how you wanna do it? I've learned from my mistake and know when to stop coding. This feels like one of those times
+    valid_routes: list[Route] = starting_routes
+    for turn in range(2, amount_of_turns + 1, 1):
+        valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)
+
+    return valid_routes
+
+
+def get_next_turn_routes(previous_turn_routes: list[Route], available_commands: dict[str, Command],
+                         commands_per_turn: int) -> list[Route]:
+
+    valid_routes: list[Route] = []
+    for route in previous_turn_routes:
+        possible_turns: list[Turn] = route.get_possible_turns(available_commands, commands_per_turn)
+        for possible_turn in possible_turns:
+            route_copy: Route = route.copy()
+            if route_copy.append(possible_turn):
+                valid_routes.append(route_copy)
+
+    return valid_routes
