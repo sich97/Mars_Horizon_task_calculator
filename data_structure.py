@@ -1,11 +1,11 @@
 import itertools
 import random
 
-# TODO: Missing power resource (in the entire local script as well)
 REGULAR_RESOURCE_NAMES = {
     "comms": "Comms",
     "navs": "Navs",
-    "data": "Data"
+    "data": "Data",
+    "power": "Power"
 }
 
 # TODO: Missing crew resource as well
@@ -395,6 +395,21 @@ class Data(Resource):
     """
     def __init__(self, value: int = 0):
         super().__init__(REGULAR_RESOURCE_NAMES["data"], value=value)
+
+    def next_turn(self) -> bool:
+        return self.is_valid_value()
+
+    def is_valid_end_of_route(self) -> bool:
+        return self.is_valid_value()
+
+
+class Power(Resource):
+    """
+    This subclass of Resource, contains variables and methods specific to this particular in-game resource.
+    This is what's considered a regular resource.
+    """
+    def __init__(self, value: int = 0):
+        super().__init__(REGULAR_RESOURCE_NAMES["power"], value=value)
 
     def next_turn(self) -> bool:
         return self.is_valid_value()
