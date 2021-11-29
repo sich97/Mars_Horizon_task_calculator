@@ -21,11 +21,6 @@ class Resource:
     The base class for all resource types, such as Comms, Navs, Data, Heat, Drift, Thrust
     """
 
-    name: str
-    value: int
-    min_value: int
-    max_value: int
-
     def __init__(self, name: str, value: int = 0, min_value: int = 0, max_value: int = 999):
         self.name: str = name
         self.value: int = value
@@ -44,18 +39,16 @@ class Command:
     Contains a ratio for exchanging input resources into output resources
     """
 
-    name: str
-    input_resources: dict[str, type(Resource)] = {}
-    output_resources: dict[str, type(Resource)] = {}
-
     def __init__(self, name: str,
                  input_resources: dict[str, type(Resource)], output_resources: dict[str, type(Resource)]):
 
         self.name: str = name
 
+        self.input_resources: dict[str, type(Resource)] = {}
         for input_resource_name, input_resource in input_resources.items():
             self.input_resources[input_resource_name]: type(Resource) = input_resource.copy()
 
+        self.output_resources: dict[str, type(Resource)] = {}
         for output_resource_name, output_resource in output_resources.items():
             self.output_resources[output_resource_name]: type(Resource) = output_resource.copy()
 
@@ -68,12 +61,11 @@ class Command:
     def copy(self) -> type(__name__):
         input_resources_copy: dict[str, type(Resource)] = {}
         for input_resource_name, input_resource in self.input_resources.items():
-            input_resources_copy[input_resource_name]: type(Resource) = input_resource.copy()
+            input_resources_copy[input_resource_name]: type(Resource) = input_resource
 
         output_resources_copy: dict[str, type(Resource)] = {}
         for output_resource_name, output_resource in self.output_resources.items():
-            output_resources_copy[output_resource_name]: type(Resource) = output_resource.copy()
-
+            output_resources_copy[output_resource_name]: type(Resource) = output_resource
         return Command(self.name, input_resources_copy, output_resources_copy)
 
 
@@ -87,10 +79,6 @@ class Turn:
     the next_turn function gets called on every item in current_resources, which is populated by subclasses of Resource.
     """
 
-    max_commands: int
-    current_resources: dict[str, type(Resource)] = {}
-    commands: list[Command] = []
-
     def __init__(self, starting_resources: dict[str, type(Resource)],
                  max_commands: int, commands: list[Command] = None):
 
@@ -102,6 +90,7 @@ class Turn:
             if len(commands) <= self.max_commands:
                 self.commands: list[Command] = [command.copy() for command in commands]
 
+        self.current_resources: dict[str, type(Resource)] = {}
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: Resource = starting_resource.copy()
 
@@ -195,10 +184,6 @@ class Route:
     (which is the current - or rather soon to be previous, turn's current_resources).
     """
 
-    max_turns: int
-    current_resources: dict[str, type(Resource)] = {}
-    turns: list[Turn] = []
-
     def __init__(self, starting_resources: dict[str, type(Resource)], max_turns: int, turns=None):
 
         self.max_turns: int = max_turns
@@ -209,6 +194,7 @@ class Route:
             if len(turns) < self.max_turns:
                 self.turns: list[Turn] = turns.copy()
 
+        self.current_resources: dict[str, type(Resource)] = {}
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: type(Resource) = starting_resource.copy()
 
@@ -301,10 +287,6 @@ class Heat(Resource):
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
 
-    overheat_limit: int
-    min_random_increase: int
-    max_random_increase: int
-
     def __init__(self, overheat_limit: int, min_increase: int, max_increase: int, value: int = 0):
         super().__init__(SPECIAL_RESOURCE_NAMES["heat"], max_value=overheat_limit, value=value)
         self.overheat_limit: int = overheat_limit
@@ -339,7 +321,6 @@ class Drift(Resource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
-    drift_bounds: list[int]
 
     def __init__(self, drift_bounds: list[int], min_drift: int, max_drift: int, value: int = 0):
         super().__init__(SPECIAL_RESOURCE_NAMES["drift"], min_value=min_drift, max_value=max_drift, value=value)
@@ -363,7 +344,6 @@ class Thrust(Resource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
-    required_thrust: int
 
     def __init__(self, max_thrust: int, required_thrust: int, value: int = 0):
         super().__init__(SPECIAL_RESOURCE_NAMES["thrust"], max_value=max_thrust, value=value)
