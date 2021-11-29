@@ -19,6 +19,16 @@ def main() -> None:
             else:
                 get_new_command(available_commands)
     else:
+        test_command = Command("Power to comms", {REGULAR_RESOURCE_NAMES["power"]: Power(value=1)},
+                               {REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)})
+        print()
+
+        test_command2 = Command("Comms and power to navs", {REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2),
+                                                            REGULAR_RESOURCE_NAMES["power"]: Power(value=1)},
+                                {REGULAR_RESOURCE_NAMES["navs"]: Navs(value=5)})
+
+        print()
+
         # TODO: Add special resources to debug in order to test them as well
         available_commands: dict[str, Command] = {
             "Power to comms": Command("Power to comms",
@@ -51,6 +61,8 @@ def main() -> None:
                                               )
         }
 
+    print()
+
     if not DEBUG:
         current_resources: dict[str, type(Resource)] = get_resources(" you start with: ")
 
@@ -60,7 +72,7 @@ def main() -> None:
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(),
             REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power(value=0)
+            REGULAR_RESOURCE_NAMES["power"]: Power(value=100)
         }
 
     if not DEBUG:

@@ -30,7 +30,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
     if False:
         for route in valid_routes:
             print(route)
-    # TODO: Figure out why there's no valid routes
+    # TODO: Figure out why there's no valid routes: might have something to do with errors in Command generation (https://stackoverflow.com/questions/70148940/seemingly-seperate-objects-interfere-with-eachother-during-initialization)
 
     return valid_routes
 

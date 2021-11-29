@@ -270,7 +270,7 @@ class Route:
 
         # Get all the permutations of the commands in this task
         command_permutations: list[tuple[Command]] =\
-            list(itertools.product(available_commands.values(), repeat=commands_per_turn))
+            list(itertools.product(list(available_commands.values()).copy(), repeat=commands_per_turn))
 
         # Loop through each permutation
         for command_permutation in command_permutations:
