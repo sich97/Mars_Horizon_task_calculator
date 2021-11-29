@@ -18,14 +18,19 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
             starting_routes.pop()
 
     print(len(starting_routes))
-    # TODO: The turns are missing their commands
-    if True:
+    if False:
         for route in starting_routes:
             print(route)
 
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
         valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)
+
+    print(len(valid_routes))
+    if False:
+        for route in valid_routes:
+            print(route)
+    # TODO: Figure out why there's no valid routes
 
     return valid_routes
 
