@@ -23,20 +23,20 @@ def main() -> None:
         available_commands: dict[str, Command] = {
             "Power to comms": Command("Power to comms",
                                       {
-                                          REGULAR_RESOURCE_NAMES["power"]: Comms(value=1),
+                                          REGULAR_RESOURCE_NAMES["power"]: Power(value=1),
                                       },
                                       {
-                                          REGULAR_RESOURCE_NAMES["comms"]: Navs(value=2)
+                                          REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
                                       }
                                       ),
 
             "Comms and power to navs": Command("Comms and power to navs",
                                                {
-                                                   REGULAR_RESOURCE_NAMES["comms"]: Navs(value=2),
-                                                   REGULAR_RESOURCE_NAMES["power"]: Data(value=1)
+                                                   REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2),
+                                                   REGULAR_RESOURCE_NAMES["power"]: Power(value=1)
                                                },
                                                {
-                                                   REGULAR_RESOURCE_NAMES["navs"]: Comms(value=5)
+                                                   REGULAR_RESOURCE_NAMES["navs"]: Navs(value=5)
                                                }
                                                ),
 
@@ -45,7 +45,7 @@ def main() -> None:
                                                   REGULAR_RESOURCE_NAMES["navs"]: Navs(value=3)
                                               },
                                               {
-                                                  REGULAR_RESOURCE_NAMES["data"]: Comms(value=2),
+                                                  REGULAR_RESOURCE_NAMES["data"]: Data(value=2),
                                                   REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
                                               }
                                               )
