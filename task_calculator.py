@@ -21,6 +21,9 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
     if False:
         for route in starting_routes:
             print(route)
+        input()
+
+    # TODO: There seems to be errors in the commands still. Some commands which should not be possible, are considered valid for some reason.
 
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
@@ -30,7 +33,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
     if False:
         for route in valid_routes:
             print(route)
-    # TODO: Figure out why there's no valid routes: might have something to do with errors in Command generation (https://stackoverflow.com/questions/70148940/seemingly-seperate-objects-interfere-with-eachother-during-initialization)
+        input()
 
     return valid_routes
 

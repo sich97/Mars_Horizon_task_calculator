@@ -60,7 +60,7 @@ def main() -> None:
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(),
             REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power(value=100)
+            REGULAR_RESOURCE_NAMES["power"]: Power(value=10)
         }
 
     if not DEBUG:
@@ -81,6 +81,7 @@ def main() -> None:
     possible_routes: list[Route] = calculator(available_commands, current_resources, amount_of_turns,
                                               amount_of_commands_per_turn, objective)
 
+    print(len(possible_routes))
     print(possible_routes)
 
 
