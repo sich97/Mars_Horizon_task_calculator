@@ -74,7 +74,7 @@ class Command:
         for output_resource_name, output_resource in self.output_resources.items():
             output_resources_copy[output_resource_name]: type(Resource) = output_resource.copy()
 
-        return type(self)(self.name, input_resources_copy, output_resources_copy)
+        return Command(self.name, input_resources_copy, output_resources_copy)
 
 
 class Turn:
@@ -94,16 +94,16 @@ class Turn:
     def __init__(self, starting_resources: dict[str, type(Resource)],
                  max_commands: int, commands: list[Command] = None):
 
-        if commands is None:
-            commands: list[Command] = []
-
         self.max_commands: int = max_commands
+
+        if commands is None:
+            self.commands: list[Command] = []
+        else:
+            if len(commands) <= self.max_commands:
+                self.commands: list[Command] = [command.copy() for command in commands]
 
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: Resource = starting_resource.copy()
-
-        if len(commands) < self.max_commands:
-            self.commands: list[Command] = [command.copy() for command in commands]
 
     def __str__(self) -> str:
         output: str = "[Turn]: "
@@ -120,7 +120,8 @@ class Turn:
         resource_copy: dict[str, type(Resource)] = {}
         for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
-        return type(self)(resource_copy, self.max_commands, commands_copy)
+
+        return Turn(resource_copy, self.max_commands, commands_copy)
 
     def append(self, command: Command) -> bool:
         """
@@ -200,16 +201,16 @@ class Route:
 
     def __init__(self, starting_resources: dict[str, type(Resource)], max_turns: int, turns=None):
 
-        if turns is None:
-            turns = []
-
         self.max_turns: int = max_turns
+
+        if turns is None:
+            self.turns = []
+        else:
+            if len(turns) < self.max_turns:
+                self.turns: list[Turn] = turns.copy()
 
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: type(Resource) = starting_resource.copy()
-
-        if len(turns) < self.max_turns:
-            self.turns: list[Turn] = turns.copy()
 
     def __str__(self) -> str:
         output: str = "[Route]: "
@@ -226,7 +227,7 @@ class Route:
         resource_copy: dict[str, type(Resource)] = {}
         for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
-        return type(self)(resource_copy, self.max_turns, turns_copy)
+        return Route(resource_copy, self.max_turns, turns_copy)
 
     def append(self, turn) -> bool:
         """
