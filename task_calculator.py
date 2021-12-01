@@ -17,25 +17,25 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
         if not valid:
             starting_routes.pop()
 
-    print(len(starting_routes))
-    if False:
-        for route in starting_routes:
-            print(route)
-        input()
-
     # TODO: There seems to be errors in the commands still. Some commands which should not be possible, are considered valid for some reason.
 
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
         valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)
 
-    print(len(valid_routes))
-    if False:
-        for route in valid_routes:
-            print(route)
-        input()
+    valid_routes: list[Route] = filter_by_objective(valid_routes, objective)
 
     return valid_routes
+
+
+def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(Resource)]) -> list[Route]:
+    output: list[Route] = []
+
+    for route in valid_routes:
+        if route.satisfies_objective(objective):
+            output.append(route)
+
+    return output
 
 
 def get_next_turn_routes(previous_turn_routes: list[Route], available_commands: dict[str, Command],
