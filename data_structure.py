@@ -52,11 +52,9 @@ class Command:
         for output_resource_name, output_resource in output_resources.items():
             self.output_resources[output_resource_name]: type(Resource) = output_resource.copy()
 
-    def __str__(self) -> str:
-        output: str = self.name + " [Command]" + "\n\t" \
-                      + "Input resources: " + str(self.input_resources) + "\n\t" \
-                      + "Output resources: " + str(self.output_resources) + "\n"
-        return remove_trailing_newlines(output)
+    def __repr__(self) -> str:
+        output = f"Command({self.name}, {self.input_resources}, {self.output_resources})"
+        return output
 
     def copy(self) -> type(__name__):
         input_resources_copy: dict[str, type(Resource)] = {}
@@ -94,12 +92,9 @@ class Turn:
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: Resource = starting_resource.copy()
 
-    def __str__(self) -> str:
-        output: str = "[Turn]: "
-        for command in self.commands:
-            output += "\n" + indent_string(str(command))
-        output += "\n"
-        return remove_trailing_newlines(output)
+    def __repr__(self) -> str:
+        output = f"Turn({self.current_resources}, {self.max_commands}, commands={self.commands})"
+        return output
 
     def __len__(self) -> int:
         return len(self.commands)
@@ -198,12 +193,9 @@ class Route:
         for starting_resource_name, starting_resource in starting_resources.items():
             self.current_resources[starting_resource_name]: type(Resource) = starting_resource.copy()
 
-    def __str__(self) -> str:
-        output: str = "[Route]: "
-        for turn in self.turns:
-            output += "\n" + indent_string(str(turn))
-        output += "\n"
-        return remove_trailing_newlines(output)
+    def __repr__(self) -> str:
+        output = f"Route({self.current_resources}, {self.max_turns}, turns={self.turns})"
+        return output
 
     def __len__(self) -> int:
         return len(self.turns)
@@ -316,6 +308,10 @@ class Heat(Resource):
     def copy(self) -> type(__name__):
         return Heat(self.overheat_limit, self.min_random_increase, self.max_random_increase, value=self.value)
 
+    def __repr__(self) -> str:
+        output = f"Heat({self.overheat_limit}, {self.min_random_increase}, {self.max_random_increase}, value={self.value})"
+        return output
+
 
 class Drift(Resource):
     """
@@ -338,6 +334,10 @@ class Drift(Resource):
 
     def copy(self) -> type(__name__):
         return Drift(self.drift_bounds.copy(), self.min_value, self.max_value, value=self.value)
+
+    def __repr__(self) -> str:
+        output = f"Drift({self.drift_bounds}, {self.min_value}, {self.max_value}, value={self.value})"
+        return output
 
 
 class Thrust(Resource):
@@ -367,6 +367,10 @@ class Thrust(Resource):
     def copy(self) -> type(__name__):
         return Thrust(self.max_value, self.required_thrust, value=self.value)
 
+    def __repr__(self) -> str:
+        output = f"Thrust({self.max_value}, {self.required_thrust}, value={self.value})"
+        return output
+
 
 class Comms(Resource):
     """
@@ -384,6 +388,10 @@ class Comms(Resource):
 
     def copy(self) -> type(__name__):
         return Comms(value=self.value)
+
+    def __repr__(self) -> str:
+        output = f"Comms(value={self.value})"
+        return output
 
 
 class Navs(Resource):
@@ -403,6 +411,10 @@ class Navs(Resource):
     def copy(self) -> type(__name__):
         return Navs(value=self.value)
 
+    def __repr__(self) -> str:
+        output = f"Navs(value={self.value})"
+        return output
+
 
 class Data(Resource):
     """
@@ -421,6 +433,10 @@ class Data(Resource):
     def copy(self) -> type(__name__):
         return Data(value=self.value)
 
+    def __repr__(self) -> str:
+        output = f"Data(value={self.value})"
+        return output
+
 
 class Power(Resource):
     """
@@ -438,6 +454,10 @@ class Power(Resource):
 
     def copy(self) -> type(__name__):
         return Power(value=self.value)
+
+    def __repr__(self) -> str:
+        output = f"Power(value={self.value})"
+        return output
 
 
 def indent_string(string: str) -> str:
