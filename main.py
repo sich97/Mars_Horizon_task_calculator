@@ -83,7 +83,10 @@ def main() -> None:
                                               amount_of_commands_per_turn, objective)
 
     print(len(possible_routes))
-    print(possible_routes)
+    for route in possible_routes:
+        for resource_name, resource in route.current_resources.items():
+            if resource.value < resource.min_value or resource.value > resource.max_value:
+                raise ValueError("Found invalid value")
 
 
 def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
