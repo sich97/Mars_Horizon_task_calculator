@@ -5,6 +5,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
                amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(Resource)]) -> list[Route]:
     """
     TODO: Fill this description and comment/typehint this function
+    TODO: Find a way to rank the different routes based on how close they are to failing if a command fails
     """
     starting_routes: list[Route] = []
 
