@@ -75,7 +75,7 @@ def main() -> None:
     else:
         objective: dict[str, type(Resource)] = {
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
-            REGULAR_RESOURCE_NAMES["comms"]: Navs(value=10)
+            REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
         }
 
     available_commands["Empty command"] = Command("Empty command", {}, {})
