@@ -1,6 +1,6 @@
 from task_calculator import calculator
 from data_structure import Command, Route, Resource, REGULAR_RESOURCE_NAMES, SPECIAL_RESOURCE_NAMES, \
-    Comms, Navs, Data, Heat, Drift, Thrust, Power
+    Comms, Navs, Data, Heat, Drift, Thrust, Power, Crew
 
 DEBUG = True
 
@@ -113,7 +113,6 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
 def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     """
     TODO: Fill this description and comment/typehint this function
-    TODO: Missing crew
     """
     special_resources: dict[str, type(Resource)] = {}
 
@@ -146,6 +145,10 @@ def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
                 required_thrust = int(input("Input required thrust: "))
                 special_resources[SPECIAL_RESOURCE_NAMES["thrust"]]: type(Resource) = \
                     Thrust(max_thrust, required_thrust, value=amount)
+
+            elif chosen_special_resource_name == SPECIAL_RESOURCE_NAMES["crew"]:
+                max_crew = int(input("Input the amount of crew: "))
+                special_resources[SPECIAL_RESOURCE_NAMES["crew"]]: type(Resource) = Crew(max_crew)
 
             continue_adding: str = input("Input another special resource? [Y/n]: ")
             if continue_adding.lower() == "n":

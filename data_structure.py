@@ -8,11 +8,11 @@ REGULAR_RESOURCE_NAMES = {
     "power": "Power"
 }
 
-# TODO: Missing crew resource as well
 SPECIAL_RESOURCE_NAMES = {
     "heat": "Heat",
     "drift": "Drift",
-    "thrust": "Thrust"
+    "thrust": "Thrust",
+    "crew": "Crew"
 }
 
 
@@ -369,6 +369,35 @@ class Thrust(Resource):
 
     def __repr__(self) -> str:
         output = f"Thrust({self.max_value}, {self.required_thrust}, value={self.value})"
+        return output
+
+
+class Crew(Resource):
+    """
+    This subclass of Resource, contains variables and methods specific to this particular in-game resource.
+    """
+
+    def __init__(self, max_value: int):
+        super(Crew, self).__init__(SPECIAL_RESOURCE_NAMES["crew"], max_value=max_value, value=max_value)
+
+    def next_turn(self) -> bool:
+        """
+        Crew resources are regained on next turn, up to the specified max value.
+        """
+        self.value = self.max_value
+        return self.is_valid_value()
+
+    def is_valid_end_of_route(self) -> bool:
+        """
+        This task does not have any special end-of-route criteria, as long as its still a valid value.
+        """
+        return self.is_valid_value()
+
+    def copy(self) -> type(__name__):
+        return Crew(self.max_value)
+
+    def __repr__(self) -> str:
+        output = f"Crew({self.max_value})"
         return output
 
 
