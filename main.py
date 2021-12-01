@@ -8,6 +8,7 @@ DEBUG = True
 def main() -> None:
     """
     TODO: Fill this description and comment/typehint this function
+    TODO: Need to find alternatives to the current datastructure where resource and resource cost is intermingled and generally very chaotic
     """
     if not DEBUG:
         available_commands: dict[str, Command] = {}
