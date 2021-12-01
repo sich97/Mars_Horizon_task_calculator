@@ -105,7 +105,7 @@ class Turn:
         for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
 
-        return Turn(resource_copy, self.max_commands, commands_copy)
+        return Turn(resource_copy, self.max_commands, commands=commands_copy)
 
     def append(self, command: Command) -> bool:
         """
@@ -205,7 +205,7 @@ class Route:
         resource_copy: dict[str, type(Resource)] = {}
         for resource_name, resource in self.current_resources.items():
             resource_copy[resource_name]: type(Resource) = resource.copy()
-        return Route(resource_copy, self.max_turns, turns_copy)
+        return Route(resource_copy, self.max_turns, turns=turns_copy)
 
     def append(self, turn) -> bool:
         """
