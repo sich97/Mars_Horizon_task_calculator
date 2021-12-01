@@ -67,8 +67,8 @@ def main() -> None:
         amount_of_turns: int = int(input("Enter how many turns for this task: "))
         amount_of_commands_per_turn: int = int(input("Enter how many commands per turn: "))
     else:
-        amount_of_turns: int = 4
-        amount_of_commands_per_turn: int = 4
+        amount_of_turns: int = 3
+        amount_of_commands_per_turn: int = 3
 
     if not DEBUG:
         objective: dict[str, type(Resource)] = get_resources(" required by the objective: ")
