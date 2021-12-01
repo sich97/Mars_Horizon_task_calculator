@@ -113,6 +113,7 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
 def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     """
     TODO: Fill this description and comment/typehint this function
+    TODO: Make sure the list of special resources, as well as the regular ones, always has a key for each resource (I think this is necessary)
     """
     special_resources: dict[str, type(Resource)] = {}
 
