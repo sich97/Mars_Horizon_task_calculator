@@ -78,6 +78,7 @@ def main() -> None:
             REGULAR_RESOURCE_NAMES["comms"]: Navs(value=10)
         }
 
+    available_commands["Empty command"] = Command("Empty command", {}, {})
     possible_routes: list[Route] = calculator(available_commands, current_resources, amount_of_turns,
                                               amount_of_commands_per_turn, objective)
 
