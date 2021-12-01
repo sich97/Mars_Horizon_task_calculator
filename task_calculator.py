@@ -17,8 +17,6 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
         if not valid:
             starting_routes.pop()
 
-    # TODO: There seems to be errors in the commands still. Some commands which should not be possible, are considered valid for some reason.
-
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
         valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)
