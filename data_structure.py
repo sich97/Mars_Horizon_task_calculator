@@ -122,7 +122,7 @@ class Turn:
 
             # Apply changes to resource pool (current_resources)
             for resource_name, resource in self.commands[-1].input_resources.items():
-                self.current_resources[resource_name].value += resource.value
+                self.current_resources[resource_name].value -= resource.value
                 if not self.current_resources[resource_name].is_valid_value():
                     return False
             for resource_name, resource in self.commands[-1].output_resources.items():
