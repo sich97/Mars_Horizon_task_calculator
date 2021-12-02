@@ -20,7 +20,6 @@ def main() -> None:
             else:
                 get_new_command(available_commands)
     else:
-        # TODO: Add special resources to debug in order to test them as well
         available_commands: dict[str, Command] = {
             "Power to comms": Command("Power to comms",
                                       {
