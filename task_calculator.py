@@ -1,8 +1,8 @@
-from data_structure import Command, Turn, Route, Resource
+from data_structure import Command, Turn, Route, BaseResource
 
 
-def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(Resource)],
-               amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(Resource)]) -> list[Route]:
+def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(BaseResource)],
+               amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(BaseResource)]) -> list[Route]:
     """
     TODO: Fill this description and comment/typehint this function
     TODO: Find a way to rank the different routes based on how close they are to failing if a command fails
@@ -27,7 +27,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
     return valid_routes
 
 
-def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(Resource)]) -> list[Route]:
+def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(BaseResource)]) -> list[Route]:
     output: list[Route] = []
 
     for route in valid_routes:

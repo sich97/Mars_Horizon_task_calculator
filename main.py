@@ -1,5 +1,5 @@
 from task_calculator import calculator
-from data_structure import Command, Route, Resource, REGULAR_RESOURCE_NAMES, SPECIAL_RESOURCE_NAMES, \
+from data_structure import Command, Route, BaseResource, REGULAR_RESOURCE_NAMES, SPECIAL_RESOURCE_NAMES, \
     Comms, Navs, Data, Heat, Drift, Thrust, Power, Crew
 
 DEBUG = True
@@ -87,11 +87,11 @@ def main() -> None:
         }
 
     if not DEBUG:
-        current_resources: dict[str, type(Resource)] = get_resources(" you start with: ")
+        current_resources: dict[str, type(BaseResource)] = get_resources(" you start with: ")
 
     else:
         # TODO: Add special resources to debug in order to test them as well
-        current_resources: dict[str, type(Resource)] = {
+        current_resources: dict[str, type(BaseResource)] = {
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(),
             REGULAR_RESOURCE_NAMES["data"]: Data(),
@@ -111,9 +111,9 @@ def main() -> None:
         amount_of_commands_per_turn: int = 3
 
     if not DEBUG:
-        objective: dict[str, type(Resource)] = get_resources(" required by the objective: ")
+        objective: dict[str, type(BaseResource)] = get_resources(" required by the objective: ")
     else:
-        objective: dict[str, type(Resource)] = {
+        objective: dict[str, type(BaseResource)] = {
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
         }
@@ -129,7 +129,7 @@ def main() -> None:
                 raise ValueError("Found invalid value")
 
 
-def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
+def get_resources(suffix: str = ": ") -> dict[str, type(BaseResource)]:
     """
     TODO: Fill this description and comment/typehint this function
     """
@@ -138,7 +138,7 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     data_amount: int = int(input("Input the amount of data" + suffix))
     power_amount: int = int(input("Input the amount of power" + suffix))
 
-    starting_resources: dict[str, type(Resource)] = {
+    starting_resources: dict[str, type(BaseResource)] = {
         REGULAR_RESOURCE_NAMES["comms"]: Comms(value=comms_amount),
         REGULAR_RESOURCE_NAMES["navs"]: Navs(value=navs_amount),
         REGULAR_RESOURCE_NAMES["data"]: Data(value=data_amount),
@@ -150,12 +150,12 @@ def get_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
     return starting_resources
 
 
-def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
+def get_special_resources(suffix: str = ": ") -> dict[str, type(BaseResource)]:
     """
     TODO: Fill this description and comment/typehint this function
     TODO: Make sure the list of special resources, as well as the regular ones, always has a key for each resource (I think this is necessary)
     """
-    special_resources: dict[str, type(Resource)] = {}
+    special_resources: dict[str, type(BaseResource)] = {}
 
     user_action: str = input("Would you like to add a special resource? [Y/n]: ")
     if not user_action.lower() == "n":
@@ -169,7 +169,7 @@ def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
                 overheat = int(input("Input overheat limit: "))
                 min_heat_gain = int(input("Input min heat gain: "))
                 max_heat_gain = int(input("Input max heat gain: "))
-                special_resources[SPECIAL_RESOURCE_NAMES["heat"]]: type(Resource) = \
+                special_resources[SPECIAL_RESOURCE_NAMES["heat"]]: type(BaseResource) = \
                     Heat(overheat, min_heat_gain, max_heat_gain, value=amount)
 
             elif chosen_special_resource_name == SPECIAL_RESOURCE_NAMES["drift"]:
@@ -178,18 +178,18 @@ def get_special_resources(suffix: str = ": ") -> dict[str, type(Resource)]:
                 drift_bounds = []
                 drift_bounds[0] = int(input("Input min drift bound: "))
                 drift_bounds[1] = int(input("Input max drift bound: "))
-                special_resources[SPECIAL_RESOURCE_NAMES["drift"]]: type(Resource) = \
+                special_resources[SPECIAL_RESOURCE_NAMES["drift"]]: type(BaseResource) = \
                     Drift(drift_bounds, min_drift, max_drift, value=amount)
 
             elif chosen_special_resource_name == SPECIAL_RESOURCE_NAMES["thrust"]:
                 max_thrust = int(input("Input max possible thrust: "))
                 required_thrust = int(input("Input required thrust: "))
-                special_resources[SPECIAL_RESOURCE_NAMES["thrust"]]: type(Resource) = \
+                special_resources[SPECIAL_RESOURCE_NAMES["thrust"]]: type(BaseResource) = \
                     Thrust(max_thrust, required_thrust, value=amount)
 
             elif chosen_special_resource_name == SPECIAL_RESOURCE_NAMES["crew"]:
                 max_crew = int(input("Input the amount of crew: "))
-                special_resources[SPECIAL_RESOURCE_NAMES["crew"]]: type(Resource) = Crew(max_crew)
+                special_resources[SPECIAL_RESOURCE_NAMES["crew"]]: type(BaseResource) = Crew(max_crew)
 
             continue_adding: str = input("Input another special resource? [Y/n]: ")
             if continue_adding.lower() == "n":
@@ -204,9 +204,9 @@ def get_new_command(available_commands: dict[str, Command]) -> None:
     """
     command_name: str = input("Please input the command name: ")
 
-    command_resources_in: dict[str, type(Resource)] = get_resources(" the command consumes: ")
+    command_resources_in: dict[str, type(BaseResource)] = get_resources(" the command consumes: ")
 
-    command_resources_out: dict[str, type(Resource)] = get_resources(" the command produces: ")
+    command_resources_out: dict[str, type(BaseResource)] = get_resources(" the command produces: ")
 
     available_commands[command_name]: Command = Command(command_name, command_resources_in, command_resources_out)
 

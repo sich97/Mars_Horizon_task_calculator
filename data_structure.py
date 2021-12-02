@@ -16,7 +16,7 @@ SPECIAL_RESOURCE_NAMES = {
 }
 
 
-class Resource:
+class BaseResource:
     """
     The base class for all resource types, such as Comms, Navs, Data, Heat, Drift, Thrust
     """
@@ -40,30 +40,30 @@ class Command:
     """
 
     def __init__(self, name: str,
-                 input_resources: dict[str, type(Resource)], output_resources: dict[str, type(Resource)]):
+                 input_resources: dict[str, type(BaseResource)], output_resources: dict[str, type(BaseResource)]):
 
         self.name: str = name
 
-        self.input_resources: dict[str, type(Resource)] = {}
+        self.input_resources: dict[str, type(BaseResource)] = {}
         for input_resource_name, input_resource in input_resources.items():
-            self.input_resources[input_resource_name]: type(Resource) = input_resource.copy()
+            self.input_resources[input_resource_name]: type(BaseResource) = input_resource.copy()
 
-        self.output_resources: dict[str, type(Resource)] = {}
+        self.output_resources: dict[str, type(BaseResource)] = {}
         for output_resource_name, output_resource in output_resources.items():
-            self.output_resources[output_resource_name]: type(Resource) = output_resource.copy()
+            self.output_resources[output_resource_name]: type(BaseResource) = output_resource.copy()
 
     def __repr__(self) -> str:
         output = f"Command({self.name}, {self.input_resources}, {self.output_resources})"
         return output
 
     def copy(self) -> type(__name__):
-        input_resources_copy: dict[str, type(Resource)] = {}
+        input_resources_copy: dict[str, type(BaseResource)] = {}
         for input_resource_name, input_resource in self.input_resources.items():
-            input_resources_copy[input_resource_name]: type(Resource) = input_resource
+            input_resources_copy[input_resource_name]: type(BaseResource) = input_resource
 
-        output_resources_copy: dict[str, type(Resource)] = {}
+        output_resources_copy: dict[str, type(BaseResource)] = {}
         for output_resource_name, output_resource in self.output_resources.items():
-            output_resources_copy[output_resource_name]: type(Resource) = output_resource
+            output_resources_copy[output_resource_name]: type(BaseResource) = output_resource
         return Command(self.name, input_resources_copy, output_resources_copy)
 
 
@@ -77,7 +77,7 @@ class Turn:
     the next_turn function gets called on every item in current_resources, which is populated by subclasses of Resource.
     """
 
-    def __init__(self, starting_resources: dict[str, type(Resource)],
+    def __init__(self, starting_resources: dict[str, type(BaseResource)],
                  max_commands: int, commands: list[Command] = None):
 
         self.max_commands: int = max_commands
@@ -88,9 +88,9 @@ class Turn:
             if len(commands) <= self.max_commands:
                 self.commands: list[Command] = [command.copy() for command in commands]
 
-        self.current_resources: dict[str, type(Resource)] = {}
+        self.current_resources: dict[str, type(BaseResource)] = {}
         for starting_resource_name, starting_resource in starting_resources.items():
-            self.current_resources[starting_resource_name]: Resource = starting_resource.copy()
+            self.current_resources[starting_resource_name]: BaseResource = starting_resource.copy()
 
     def __repr__(self) -> str:
         output = f"Turn({self.current_resources}, {self.max_commands}, commands={self.commands})"
@@ -101,9 +101,9 @@ class Turn:
 
     def copy(self) -> type(__name__):
         commands_copy: list[Command] = [command.copy() for command in self.commands]
-        resource_copy: dict[str, type(Resource)] = {}
+        resource_copy: dict[str, type(BaseResource)] = {}
         for resource_name, resource in self.current_resources.items():
-            resource_copy[resource_name]: type(Resource) = resource.copy()
+            resource_copy[resource_name]: type(BaseResource) = resource.copy()
 
         return Turn(resource_copy, self.max_commands, commands=commands_copy)
 
@@ -179,7 +179,7 @@ class Route:
     (which is the current - or rather soon to be previous, turn's current_resources).
     """
 
-    def __init__(self, starting_resources: dict[str, type(Resource)], max_turns: int, turns=None):
+    def __init__(self, starting_resources: dict[str, type(BaseResource)], max_turns: int, turns=None):
 
         self.max_turns: int = max_turns
 
@@ -189,9 +189,9 @@ class Route:
             if len(turns) < self.max_turns:
                 self.turns: list[Turn] = turns.copy()
 
-        self.current_resources: dict[str, type(Resource)] = {}
+        self.current_resources: dict[str, type(BaseResource)] = {}
         for starting_resource_name, starting_resource in starting_resources.items():
-            self.current_resources[starting_resource_name]: type(Resource) = starting_resource.copy()
+            self.current_resources[starting_resource_name]: type(BaseResource) = starting_resource.copy()
 
     def __repr__(self) -> str:
         output = f"Route({self.current_resources}, {self.max_turns}, turns={self.turns})"
@@ -202,9 +202,9 @@ class Route:
 
     def copy(self) -> type(__name__):
         turns_copy: list[Turn] = [turn.copy() for turn in self.turns]
-        resource_copy: dict[str, type(Resource)] = {}
+        resource_copy: dict[str, type(BaseResource)] = {}
         for resource_name, resource in self.current_resources.items():
-            resource_copy[resource_name]: type(Resource) = resource.copy()
+            resource_copy[resource_name]: type(BaseResource) = resource.copy()
         return Route(resource_copy, self.max_turns, turns=turns_copy)
 
     def append(self, turn) -> bool:
@@ -214,7 +214,7 @@ class Route:
         """
         if len(self.turns) < self.max_turns:
             self.turns.append(turn.copy())
-            self.current_resources: dict[str, type(Resource)] = self.turns[-1].current_resources
+            self.current_resources: dict[str, type(BaseResource)] = self.turns[-1].current_resources
             return self.is_valid()
         else:
             raise AttributeError(
@@ -226,10 +226,10 @@ class Route:
                 return False
         return True
 
-    def is_finished(self, objective: dict[str, type(Resource)]) -> bool:
+    def is_finished(self, objective: dict[str, type(BaseResource)]) -> bool:
         return len(self.turns) == self.max_turns and self.satisfies_objective(objective)
 
-    def satisfies_objective(self, objective: dict[str, type(Resource)]) -> bool:
+    def satisfies_objective(self, objective: dict[str, type(BaseResource)]) -> bool:
         """
         TODO: Implement bonus objectives (might be done somewhere else, in the main script for example)
         """
@@ -254,7 +254,7 @@ class Route:
         for command_permutation in command_permutations:
 
             # Create a hypothetical turn object based on the Route's current_resources
-            hypothetical_resource_pool: dict[str, type(Resource)] = self.current_resources.copy()
+            hypothetical_resource_pool: dict[str, type(BaseResource)] = self.current_resources.copy()
             hypothetical_turn: Turn = Turn(hypothetical_resource_pool, commands_per_turn)
 
             # Loop through each command in the current permutation
@@ -274,7 +274,7 @@ class Route:
         return possible_turns
 
 
-class Heat(Resource):
+class Heat(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
@@ -313,7 +313,7 @@ class Heat(Resource):
         return output
 
 
-class Drift(Resource):
+class Drift(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
@@ -340,7 +340,7 @@ class Drift(Resource):
         return output
 
 
-class Thrust(Resource):
+class Thrust(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
@@ -372,7 +372,7 @@ class Thrust(Resource):
         return output
 
 
-class Crew(Resource):
+class Crew(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
@@ -401,7 +401,7 @@ class Crew(Resource):
         return output
 
 
-class Comms(Resource):
+class Comms(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
@@ -423,7 +423,7 @@ class Comms(Resource):
         return output
 
 
-class Navs(Resource):
+class Navs(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
@@ -445,7 +445,7 @@ class Navs(Resource):
         return output
 
 
-class Data(Resource):
+class Data(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
@@ -467,7 +467,7 @@ class Data(Resource):
         return output
 
 
-class Power(Resource):
+class Power(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     This is what's considered a regular resource.
