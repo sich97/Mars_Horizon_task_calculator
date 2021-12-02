@@ -49,7 +49,41 @@ def main() -> None:
                                                   REGULAR_RESOURCE_NAMES["data"]: Data(value=2),
                                                   REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
                                               }
-                                              )
+                                              ),
+            "Heat to power": Command("Heat to power",
+                                     {
+                                         SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, value=2)
+                                     },
+                                     {
+                                         REGULAR_RESOURCE_NAMES["power"]: Data(value=2)
+                                     }
+                                     ),
+            "Crew and data to navs": Command("Crew and data to navs",
+                                             {
+                                                 SPECIAL_RESOURCE_NAMES["crew"]: Navs(value=2),
+                                                 REGULAR_RESOURCE_NAMES["data"]: Data(value=2)
+                                             },
+                                             {
+                                                 REGULAR_RESOURCE_NAMES["navs"]: Navs(value=8)
+                                             }
+                                             ),
+            "Drift to data": Command("Drift to data",
+                                     {
+                                         SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=-1)
+                                     },
+                                     {
+                                         REGULAR_RESOURCE_NAMES["data"]: Data(value=3)
+                                     }
+                                     ),
+            "Power to thrust and drift": Command("Power to thrust and drift",
+                                                 {
+                                                     REGULAR_RESOURCE_NAMES["power"]: Power(value=2)
+                                                 },
+                                                 {
+                                                     SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(20, 4, value=1),
+                                                     SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=1)
+                                                 }
+                                                 )
         }
 
     if not DEBUG:
@@ -61,7 +95,12 @@ def main() -> None:
             REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
             REGULAR_RESOURCE_NAMES["navs"]: Navs(),
             REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power(value=10)
+            REGULAR_RESOURCE_NAMES["power"]: Power(value=10),
+
+            SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, 2),
+            SPECIAL_RESOURCE_NAMES["crew"]: Crew(2),
+            SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
+            SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(20, 4, value=3)
         }
 
     if not DEBUG:
