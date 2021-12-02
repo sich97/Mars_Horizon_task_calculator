@@ -1,6 +1,7 @@
 import itertools
 import random
 
+# TODO: Need to find alternatives to the current datastructure where resource and resource cost is intermingled (because they are made of the same resource/BaseResource and generally very chaotic
 REGULAR_RESOURCE_NAMES = {
     "comms": "Comms",
     "navs": "Navs",
@@ -343,10 +344,11 @@ class Drift(BaseResource):
 class Thrust(BaseResource):
     """
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
+    TODO: Sjekk at ikke thrust har noen max value
     """
 
-    def __init__(self, max_thrust: int, required_thrust: int, value: int = 0):
-        super().__init__(SPECIAL_RESOURCE_NAMES["thrust"], max_value=max_thrust, value=value)
+    def __init__(self, required_thrust: int, value: int = 0):
+        super().__init__(SPECIAL_RESOURCE_NAMES["thrust"], value=value)
         self.required_thrust = required_thrust
 
     def next_turn(self) -> bool:
@@ -365,7 +367,7 @@ class Thrust(BaseResource):
         return self.is_valid_value() and self.value >= self.required_thrust
 
     def copy(self) -> type(__name__):
-        return Thrust(self.max_value, self.required_thrust, value=self.value)
+        return Thrust(self.required_thrust, value=self.value)
 
     def __repr__(self) -> str:
         output = f"Thrust({self.max_value}, {self.required_thrust}, value={self.value})"
@@ -377,8 +379,8 @@ class Crew(BaseResource):
     This subclass of Resource, contains variables and methods specific to this particular in-game resource.
     """
 
-    def __init__(self, max_value: int):
-        super(Crew, self).__init__(SPECIAL_RESOURCE_NAMES["crew"], max_value=max_value, value=max_value)
+    def __init__(self, value: int = 0):
+        super(Crew, self).__init__(SPECIAL_RESOURCE_NAMES["crew"], max_value=value, value=value)
 
     def next_turn(self) -> bool:
         """

@@ -1,8 +1,10 @@
 from data_structure import Command, Turn, Route, BaseResource
+from PyQt5.Qt import QMainWindow
 
 
 def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(BaseResource)],
-               amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(BaseResource)]) -> list[Route]:
+               amount_of_turns: int, commands_per_turn: int, objective: dict[str, type(BaseResource)],
+               gui: type(QMainWindow)) -> None:
     """
     TODO: Fill this description and comment/typehint this function
     TODO: Find a way to rank the different routes based on how close they are to failing if a command fails
@@ -20,17 +22,22 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
 
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
-        valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn)
+        valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn, gui)
 
-    valid_routes: list[Route] = filter_by_objective(valid_routes, objective)
+    valid_routes: list[Route] = filter_by_objective(valid_routes, objective, gui)
 
-    return valid_routes
+    gui.present_results(valid_routes)
 
 
-def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(BaseResource)]) -> list[Route]:
+def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(BaseResource)], gui: type(QMainWindow)) -> list[Route]:
+    """
+    # TODO: Fill this description and comment/typehint this function
+    """
     output: list[Route] = []
 
     for route in valid_routes:
+        if not gui.continue_calculating:
+            break
         if route.satisfies_objective(objective):
             output.append(route)
 
@@ -38,15 +45,19 @@ def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(Bas
 
 
 def get_next_turn_routes(previous_turn_routes: list[Route], available_commands: dict[str, Command],
-                         commands_per_turn: int) -> list[Route]:
+                         commands_per_turn: int, gui: type(QMainWindow)) -> list[Route]:
     """
     TODO: Fill this description and comment/typehint this function
     """
 
     valid_routes: list[Route] = []
     for route in previous_turn_routes:
+        if not gui.continue_calculating:
+            break
         possible_turns: list[Turn] = route.get_possible_turns(available_commands, commands_per_turn)
         for possible_turn in possible_turns:
+            if not gui.continue_calculating:
+                break
             route_copy: Route = route.copy()
             if route_copy.append(possible_turn):
                 valid_routes.append(route_copy)

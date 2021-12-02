@@ -1,24 +1,317 @@
+from PyQt5.QtCore import QRegExp
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel,\
+    QGroupBox, QFormLayout, QLineEdit, QCheckBox, QPushButton, QSizePolicy
+from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
+import sys
+
 from task_calculator import calculator
 from data_structure import Command, Route, BaseResource, REGULAR_RESOURCE_NAMES, SPECIAL_RESOURCE_NAMES, \
     Comms, Navs, Data, Heat, Drift, Thrust, Power, Crew
 
-DEBUG = True
+
+DEBUG = False
 
 
-def main() -> None:
-    """
-    TODO: Fill this description and comment/typehint this function
-    TODO: Need to find alternatives to the current datastructure where resource and resource cost is intermingled and generally very chaotic
-    """
+# TODO: The calculator does not calculate correctly anymore. This is due to the change to GUI, because I did not change anything about the calculator itself. Inspecting the variables coming out from the GUI is a good start.
+
+
+class MainWindow(QMainWindow):
+    # TODO: Implement a way to prevent user input when calculating
+    def __init__(self, parent=None):
+        """Initializer."""
+        super().__init__(parent)
+        self.setWindowTitle("Mars Horizon Task Calculator")
+
+        # Center this window on screen
+        qt_rectangle = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        qt_rectangle.moveCenter(center_point)
+        self.move(qt_rectangle.topLeft())
+
+        # Fill the GUI
+        main_widget = QWidget()
+        self.local_layout = QVBoxLayout()
+        main_widget.setLayout(self.local_layout)
+        self.setCentralWidget(main_widget)
+
+        self.starting_resources = ResourcesListWidget("Starting resources", self)
+        self.local_layout.addWidget(self.starting_resources)
+
+        self.objective_resources = ResourcesListWidget("Objective", self)
+        self.local_layout.addWidget(self.objective_resources)
+
+        self.amount_of_turns = SingularIntInput(self, "Amount of turns: ", 3)
+        self.local_layout.addWidget(self.amount_of_turns)
+
+        self.commands_per_turn = SingularIntInput(self, "Amount of commands per turn: ", 3)
+        self.local_layout.addWidget(self.commands_per_turn)
+
+        self.continue_calculating = False
+        self.calculate_button = QPushButton("Calculate", parent=self)
+        self.local_layout.addWidget(self.calculate_button)
+        self.calculate_button.clicked.connect(self.calculate_button_clicked)
+
+        self.output_field = QLabel(parent=self)
+        self.local_layout.addWidget(self.output_field)
+
+        self.available_commands_widget = AvailableCommandsWidget("Available commands", self)
+        self.local_layout.addWidget(self.available_commands_widget)
+        self.available_commands_widget.add_row()
+
+        self.add_row_button = QPushButton("+", parent=self)
+        self.local_layout.addWidget(self.add_row_button)
+        self.add_row_button.clicked.connect(self.available_commands_widget.add_row)
+
+    def calculate_button_clicked(self):
+        if not self.continue_calculating:
+            calculation_arguments: dict[str, any] = self.parse_input()
+            self.calculate_button.setText("Stop")
+            self.continue_calculating = True
+            self.output_field.setText("Calculating...")
+            calculator(**calculation_arguments)
+        else:
+            self.continue_calculating = False
+            self.output_field.setText("Stopping...")
+
+    def parse_input(self) -> dict[str, any]:
+        output: dict[str, any] = {"available_commands": get_available_commands(self),
+                                  "starting_resources": get_starting_resources(self),
+                                  "amount_of_turns": get_amount_of_turns(self),
+                                  "commands_per_turn": get_commands_per_turn(self), "objective": get_objective(self),
+                                  "gui": self}
+        return output
+
+    def present_results(self, valid_routes: list[Route]) -> None:
+        self.continue_calculating = False
+        self.output_field.setText("Done: " + str(len(valid_routes)))
+        self.calculate_button.setText("Calculate")
+
+
+class SingularIntInput(QWidget):
+    def __init__(self, parent: QWidget, label: str = "", value: int = 0):
+        super(SingularIntInput, self).__init__(parent=parent)
+        self.local_layout = QHBoxLayout()
+        self.setLayout(self.local_layout)
+
+        self.label = QLabel(label)
+        self.label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
+        self.local_layout.addWidget(self.label)
+
+        self.input = QLineEdit()
+        self.input.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Maximum)
+        self.input.setText(str(value))
+        self.input.setValidator(QRegExpValidator(QRegExp("^[0-9]+$")))
+        self.local_layout.addWidget(self.input)
+
+
+class AvailableCommandsWidget(QGroupBox):
+    def __init__(self, name: str, parent: QWidget):
+        super(AvailableCommandsWidget, self).__init__(name, parent=parent)
+        self.local_layout = QFormLayout()
+        self.setLayout(self.local_layout)
+
+    def add_row(self) -> None:
+        self.local_layout.addRow(CommandLineWidget(self, self.local_layout.rowCount()))
+
+    def delete_row(self, row_num: int) -> None:
+        self.local_layout.removeRow(row_num)
+
+
+class CommandLineWidget(QGroupBox):
+    def __init__(self, parent: QWidget, row_num: int, name=""):
+        super(CommandLineWidget, self).__init__("", parent=parent)
+        self.local_layout = QHBoxLayout()
+        self.setLayout(self.local_layout)
+
+        self.row_num = row_num
+
+        self.is_active = QCheckBox()
+        self.local_layout.addWidget(self.is_active)
+
+        self.command_name = QLineEdit(self)
+        self.command_name.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Maximum))
+        self.command_name.setPlaceholderText("Type command name here")
+        self.command_name.textChanged.connect(self.command_name_changed)
+        self.command_name.setText(name)
+
+        self.local_layout.addWidget(self.command_name)
+
+        self.input_resource_list = ResourcesListWidget("Input resources", self)
+        self.local_layout.addWidget(self.input_resource_list)
+
+        self.output_resource_list = ResourcesListWidget("Output resources", self)
+        self.local_layout.addWidget(self.output_resource_list)
+
+        self.delete_button = QPushButton("-", parent=self)
+        self.local_layout.addWidget(self.delete_button)
+        self.delete_button.clicked.connect(lambda: parent.delete_row(self.row_num))
+
+    def command_name_changed(self):
+        if not self.command_name.text():
+            self.is_active.setChecked(False)
+        else:
+            self.is_active.setChecked(True)
+
+
+class ResourcesListWidget(QGroupBox):
+    def __init__(self, name: str, parent: QWidget, readonly: bool = False):
+        resource_names: list[str] = list(REGULAR_RESOURCE_NAMES.values()) + list(SPECIAL_RESOURCE_NAMES.values())
+        super(ResourcesListWidget, self).__init__(name, parent=parent)
+        self.local_layout = QHBoxLayout()
+        self.setLayout(self.local_layout)
+
+        for resource_name in resource_names:
+            self.local_layout.addWidget(ResourceWidget(self, resource_name, 0))
+
+
+class ResourceWidget(QWidget):
+    # TODO: Implementer knapper for å øke/minke verdi
+    def __init__(self, parent: QWidget, name: str, value: int = 0, readonly: bool = False):
+        super(ResourceWidget, self).__init__(parent=parent)
+        self.local_layout = QVBoxLayout()
+        self.setLayout(self.local_layout)
+
+        self.name = name
+
+        self.label = QLabel(self.name)
+        self.local_layout.addWidget(self.label)
+        self.value = QLineEdit()
+        self.value.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.value.setText(str(value))
+        self.value.setValidator(QRegExpValidator(QRegExp("^[0-9]+$"))) # TODO: Tillat negative tall for drift (hvis dette stemmer med spillet)
+        self.value.setReadOnly(readonly)
+        self.local_layout.addWidget(self.value)
+
+
+def get_resource_from_name(name: str, value: int) -> type(BaseResource):
+    if name == REGULAR_RESOURCE_NAMES["comms"]:
+        return Comms(value=value)
+    elif name == REGULAR_RESOURCE_NAMES["navs"]:
+        return Navs(value=value)
+    elif name == REGULAR_RESOURCE_NAMES["data"]:
+        return Data(value=value)
+    elif name == REGULAR_RESOURCE_NAMES["power"]:
+        return Power(value=value)
+
+    elif name == SPECIAL_RESOURCE_NAMES["heat"]:
+        return Heat(4, 0, 3, value=value)
+    elif name == SPECIAL_RESOURCE_NAMES["drift"]:
+        return Drift([-2, 2], -4, 4, value=value)
+    elif name == SPECIAL_RESOURCE_NAMES["thrust"]:
+        return Thrust(4, value=value)
+    elif name == SPECIAL_RESOURCE_NAMES["crew"]:
+        return Crew(value=value)
+
+
+def get_amount_of_turns(gui: MainWindow) -> int:
+    if not DEBUG:
+        if not gui.amount_of_turns.input.text():
+            value: int = 0
+        else:
+            value: int = int(gui.amount_of_turns.input.text())
+        return value
+
+    else:
+        return 3
+
+
+def get_commands_per_turn(gui: MainWindow) -> int:
+    if not DEBUG:
+        if not gui.commands_per_turn.input.text():
+            value: int = 0
+        else:
+            value: int = int(gui.commands_per_turn.input.text())
+        return value
+
+    else:
+        return 3
+
+
+# TODO: Would it be possible to generalize some of these functions to make the code more maintaneable?
+
+
+def get_objective(gui: MainWindow) -> dict[str, type(BaseResource)]:
+    if not DEBUG:
+        objective: dict[str, type(BaseResource)] = {}
+        objective_layout: QHBoxLayout = gui.objective_resources.local_layout
+        for resource_index in range(objective_layout.count()):
+            resource: ResourceWidget = objective_layout.itemAt(resource_index).widget()
+            if not resource.value.text():
+                value: int = 0
+            else:
+                value: int = int(resource.value.text())
+            objective[resource.name] = get_resource_from_name(resource.name, value)
+        return objective
+
+    else:
+        objective: dict[str, type(BaseResource)] = {
+            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
+            REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
+        }
+        return objective
+
+
+def get_starting_resources(gui: MainWindow) -> dict[str, type(BaseResource)]:
+    if not DEBUG:
+        starting_resources: dict[str, type(BaseResource)] = {}
+        starting_resources_layout: QHBoxLayout = gui.starting_resources.local_layout
+        for resource_index in range(starting_resources_layout.count()):
+            resource: ResourceWidget = starting_resources_layout.itemAt(resource_index).widget()
+            if not resource.value.text():
+                value: int = 0
+            else:
+                value: int = int(resource.value.text())
+            starting_resources[resource.name] = get_resource_from_name(resource.name, value)
+        return starting_resources
+
+    else:
+        starting_resources: dict[str, type(BaseResource)] = {
+            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
+            REGULAR_RESOURCE_NAMES["navs"]: Navs(),
+            REGULAR_RESOURCE_NAMES["data"]: Data(),
+            REGULAR_RESOURCE_NAMES["power"]: Power(value=10),
+
+            SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, 2),
+            SPECIAL_RESOURCE_NAMES["crew"]: Crew(2),
+            SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
+            SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=3)
+        }
+        return starting_resources
+
+
+def get_available_commands(gui: MainWindow) -> dict[str, Command]:
     if not DEBUG:
         available_commands: dict[str, Command] = {}
+        commands_layout: QFormLayout = gui.available_commands_widget.local_layout
+        for row_index in range(commands_layout.rowCount()):
+            row: CommandLineWidget = commands_layout.itemAt(row_index).widget()
+            if row.is_active:
+                input_resources: dict[str, type(BaseResource)] = {}
+                for input_resource_index in range(row.input_resource_list.local_layout.count()):
+                    input_resource: ResourceWidget =\
+                        row.input_resource_list.local_layout.itemAt(input_resource_index).widget()
+                    if not input_resource.value.text():
+                        input_value: int = 0
+                    else:
+                        input_value: int = int(input_resource.value.text())
+                    input_resources[input_resource.name]: type(BaseResource) =\
+                        get_resource_from_name(input_resource.name, input_value)
 
-        while True:
-            user_action = input("Input another command? [Y/n]: ")
-            if user_action.lower() == "n":
-                break
-            else:
-                get_new_command(available_commands)
+                output_resources: dict[str, type(BaseResource)] = {}
+                for output_resource_index in range(row.output_resource_list.local_layout.count()):
+                    output_resource: ResourceWidget =\
+                        row.output_resource_list.local_layout.itemAt(output_resource_index).widget()
+                    if not output_resource.value.text():
+                        output_value: int = 0
+                    else:
+                        output_value: int = int(output_resource.value.text())
+                    output_resources[output_resource.name]: type(BaseResource) =\
+                        get_resource_from_name(output_resource.name, output_value)
+
+                command: Command = Command(row.command_name.text(), input_resources, output_resources)
+                available_commands[row.command_name.text()]: Command = command
+        return available_commands
+
     else:
         available_commands: dict[str, Command] = {
             "Power to comms": Command("Power to comms",
@@ -79,55 +372,15 @@ def main() -> None:
                                                      REGULAR_RESOURCE_NAMES["power"]: Power(value=2)
                                                  },
                                                  {
-                                                     SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(20, 4, value=1),
+                                                     SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=1),
                                                      SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=1)
                                                  }
                                                  )
         }
-
-    if not DEBUG:
-        current_resources: dict[str, type(BaseResource)] = get_resources(" you start with: ")
-
-    else:
-        # TODO: Add special resources to debug in order to test them as well
-        current_resources: dict[str, type(BaseResource)] = {
-            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
-            REGULAR_RESOURCE_NAMES["navs"]: Navs(),
-            REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power(value=10),
-
-            SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, 2),
-            SPECIAL_RESOURCE_NAMES["crew"]: Crew(2),
-            SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
-            SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(20, 4, value=3)
-        }
-
-    if not DEBUG:
-        amount_of_turns: int = int(input("Enter how many turns for this task: "))
-        amount_of_commands_per_turn: int = int(input("Enter how many commands per turn: "))
-    else:
-        amount_of_turns: int = 3
-        amount_of_commands_per_turn: int = 3
-
-    if not DEBUG:
-        objective: dict[str, type(BaseResource)] = get_resources(" required by the objective: ")
-    else:
-        objective: dict[str, type(BaseResource)] = {
-            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
-            REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
-        }
-
-    available_commands["Empty command"] = Command("Empty command", {}, {})
-    possible_routes: list[Route] = calculator(available_commands, current_resources, amount_of_turns,
-                                              amount_of_commands_per_turn, objective)
-
-    print(len(possible_routes))
-    for route in possible_routes:
-        for resource_name, resource in route.current_resources.items():
-            if resource.value < resource.min_value or resource.value > resource.max_value:
-                raise ValueError("Found invalid value")
+        return available_commands
 
 
+''' # TODO: Depreceated
 def get_resources(suffix: str = ": ") -> dict[str, type(BaseResource)]:
     """
     TODO: Fill this description and comment/typehint this function
@@ -218,7 +471,11 @@ def list_available_resource_types(list_of_names: dict[str, str]) -> None:
     for resource_type_index in range(len(list_of_names.items())):
         output_string += str(resource_type_index) + ": " + list(list_of_names.items())[resource_type_index][1] + "\n"
     print(output_string)
+'''
 
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    win = MainWindow()
+    win.show()
+    sys.exit(app.exec_())
