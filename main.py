@@ -69,10 +69,12 @@ class MainWindow(QMainWindow):
             self.calculate_button.setText("Stop")
             self.continue_calculating = True
             self.output_field.setText("Calculating...")
-            # calculator(**calculation_arguments)
+            QApplication.processEvents()
+            calculator(**calculation_arguments)
         else:
             self.continue_calculating = False
             self.output_field.setText("Stopping...")
+            QApplication.processEvents()
 
     def parse_input(self) -> dict[str, any]:
         if not DEBUG:
@@ -174,6 +176,7 @@ class MainWindow(QMainWindow):
         self.continue_calculating = False
         self.output_field.setText("Done: " + str(len(valid_routes)))
         self.calculate_button.setText("Calculate")
+        QApplication.processEvents()
 
 
 class SingularIntInput(QWidget):

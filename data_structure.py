@@ -1,5 +1,6 @@
 import itertools
 import random
+from PyQt5.Qt import QApplication
 
 # TODO: Need to find alternatives to the current datastructure where resource and resource cost is intermingled (because they are made of the same resource/BaseResource and generally very chaotic
 REGULAR_RESOURCE_NAMES = {
@@ -260,6 +261,7 @@ class Route:
 
             # Loop through each command in the current permutation
             for command in command_permutation:
+                QApplication.processEvents()
 
                 # If appending the command to the hypothetical turn, this permutation is invalid, so we discard it.
                 if not hypothetical_turn.append(command):

@@ -1,5 +1,5 @@
 from data_structure import Command, Turn, Route, BaseResource
-from PyQt5.Qt import QMainWindow
+from PyQt5.Qt import QMainWindow, QApplication
 
 
 def calculator(available_commands: dict[str, Command], starting_resources: dict[str, type(BaseResource)],
@@ -15,6 +15,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
     empty_route: Route = Route(starting_resources, amount_of_turns)
     possible_turns_from_empty_route: list[Turn] = empty_route.get_possible_turns(available_commands, commands_per_turn)
     for possible_turn in possible_turns_from_empty_route:
+        QApplication.processEvents()
         starting_routes.append(Route(starting_resources, amount_of_turns))
         valid = starting_routes[-1].append(possible_turn)
         if not valid:
@@ -22,6 +23,7 @@ def calculator(available_commands: dict[str, Command], starting_resources: dict[
 
     valid_routes: list[Route] = starting_routes
     for turn in range(2, amount_of_turns + 1, 1):
+        QApplication.processEvents()
         valid_routes = get_next_turn_routes(valid_routes, available_commands, commands_per_turn, gui)
 
     valid_routes: list[Route] = filter_by_objective(valid_routes, objective, gui)
@@ -36,6 +38,7 @@ def filter_by_objective(valid_routes: list[Route], objective: dict[str, type(Bas
     output: list[Route] = []
 
     for route in valid_routes:
+        QApplication.processEvents()
         if not gui.continue_calculating:
             break
         if route.satisfies_objective(objective):
@@ -56,6 +59,7 @@ def get_next_turn_routes(previous_turn_routes: list[Route], available_commands: 
             break
         possible_turns: list[Turn] = route.get_possible_turns(available_commands, commands_per_turn)
         for possible_turn in possible_turns:
+            QApplication.processEvents()
             if not gui.continue_calculating:
                 break
             route_copy: Route = route.copy()
