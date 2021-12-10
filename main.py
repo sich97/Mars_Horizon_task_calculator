@@ -1,15 +1,16 @@
+import time
+
 from PyQt5.QtCore import QRegExp
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel,\
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, \
     QGroupBox, QFormLayout, QLineEdit, QCheckBox, QPushButton, QSizePolicy
-from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
+from PyQt5.QtGui import QRegExpValidator
 import sys
 
 from task_calculator import calculator
 from data_structure import Command, Route, BaseResource, REGULAR_RESOURCE_NAMES, SPECIAL_RESOURCE_NAMES, \
     Comms, Navs, Data, Heat, Drift, Thrust, Power, Crew
 
-
-DEBUG = False
+DEBUG = True
 
 
 # TODO: The calculator does not calculate correctly anymore. This is due to the change to GUI, because I did not change anything about the calculator itself. Inspecting the variables coming out from the GUI is a good start.
@@ -68,17 +69,105 @@ class MainWindow(QMainWindow):
             self.calculate_button.setText("Stop")
             self.continue_calculating = True
             self.output_field.setText("Calculating...")
-            calculator(**calculation_arguments)
+            # calculator(**calculation_arguments)
         else:
             self.continue_calculating = False
             self.output_field.setText("Stopping...")
 
     def parse_input(self) -> dict[str, any]:
-        output: dict[str, any] = {"available_commands": get_available_commands(self),
-                                  "starting_resources": get_starting_resources(self),
-                                  "amount_of_turns": get_amount_of_turns(self),
-                                  "commands_per_turn": get_commands_per_turn(self), "objective": get_objective(self),
-                                  "gui": self}
+        if not DEBUG:
+            output: dict[str, any] = {"available_commands": get_available_commands(self),
+                                      "starting_resources": get_starting_resources(self),
+                                      "amount_of_turns": get_amount_of_turns(self),
+                                      "commands_per_turn": get_commands_per_turn(self),
+                                      "objective": get_objective(self),
+                                      "gui": self}
+        else:
+            output: dict[str, any] = {
+                "available_commands": {
+                    "Power to comms": Command("Power to comms",
+                                              {
+                                                  REGULAR_RESOURCE_NAMES["power"]: Power(value=1),
+                                              },
+                                              {
+                                                  REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
+                                              }
+                                              ),
+
+                    "Comms and power to navs": Command("Comms and power to navs",
+                                                       {
+                                                           REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2),
+                                                           REGULAR_RESOURCE_NAMES["power"]: Power(value=1)
+                                                       },
+                                                       {
+                                                           REGULAR_RESOURCE_NAMES["navs"]: Navs(value=5)
+                                                       }
+                                                       ),
+
+                    "Navs to data and comms": Command("Navs to data and comms",
+                                                      {
+                                                          REGULAR_RESOURCE_NAMES["navs"]: Navs(value=3)
+                                                      },
+                                                      {
+                                                          REGULAR_RESOURCE_NAMES["data"]: Data(value=2),
+                                                          REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
+                                                      }
+                                                      ),
+                    "Heat to power": Command("Heat to power",
+                                             {
+                                                 SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, value=2)
+                                             },
+                                             {
+                                                 REGULAR_RESOURCE_NAMES["power"]: Data(value=2)
+                                             }
+                                             ),
+                    "Crew and data to navs": Command("Crew and data to navs",
+                                                     {
+                                                         SPECIAL_RESOURCE_NAMES["crew"]: Navs(value=2),
+                                                         REGULAR_RESOURCE_NAMES["data"]: Data(value=2)
+                                                     },
+                                                     {
+                                                         REGULAR_RESOURCE_NAMES["navs"]: Navs(value=8)
+                                                     }
+                                                     ),
+                    "Drift to data": Command("Drift to data",
+                                             {
+                                                 SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=-1)
+                                             },
+                                             {
+                                                 REGULAR_RESOURCE_NAMES["data"]: Data(value=3)
+                                             }
+                                             ),
+                    "Power to thrust and drift": Command("Power to thrust and drift",
+                                                         {
+                                                             REGULAR_RESOURCE_NAMES["power"]: Power(value=2)
+                                                         },
+                                                         {
+                                                             SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=1),
+                                                             SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4,
+                                                                                                    value=1)
+                                                         }
+                                                         )
+                },
+                "starting_resources": {
+                    REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
+                    REGULAR_RESOURCE_NAMES["navs"]: Navs(),
+                    REGULAR_RESOURCE_NAMES["data"]: Data(),
+                    REGULAR_RESOURCE_NAMES["power"]: Power(value=10),
+
+                    SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, 2),
+                    SPECIAL_RESOURCE_NAMES["crew"]: Crew(2),
+                    SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
+                    SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=3)
+                },
+                "amount_of_turns": 3,
+                "commands_per_turn": 3,
+                "objective": {
+                    REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
+                    REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
+                },
+                "gui": self
+            }
         return output
 
     def present_results(self, valid_routes: list[Route]) -> None:
@@ -206,180 +295,81 @@ def get_resource_from_name(name: str, value: int) -> type(BaseResource):
 
 
 def get_amount_of_turns(gui: MainWindow) -> int:
-    if not DEBUG:
-        if not gui.amount_of_turns.input.text():
-            value: int = 0
-        else:
-            value: int = int(gui.amount_of_turns.input.text())
-        return value
-
+    if not gui.amount_of_turns.input.text():
+        value: int = 0
     else:
-        return 3
+        value: int = int(gui.amount_of_turns.input.text())
+    return value
 
 
 def get_commands_per_turn(gui: MainWindow) -> int:
-    if not DEBUG:
-        if not gui.commands_per_turn.input.text():
-            value: int = 0
-        else:
-            value: int = int(gui.commands_per_turn.input.text())
-        return value
-
+    if not gui.commands_per_turn.input.text():
+        value: int = 0
     else:
-        return 3
+        value: int = int(gui.commands_per_turn.input.text())
+    return value
 
 
 # TODO: Would it be possible to generalize some of these functions to make the code more maintaneable?
 
 
 def get_objective(gui: MainWindow) -> dict[str, type(BaseResource)]:
-    if not DEBUG:
-        objective: dict[str, type(BaseResource)] = {}
-        objective_layout: QHBoxLayout = gui.objective_resources.local_layout
-        for resource_index in range(objective_layout.count()):
-            resource: ResourceWidget = objective_layout.itemAt(resource_index).widget()
-            if not resource.value.text():
-                value: int = 0
-            else:
-                value: int = int(resource.value.text())
-            objective[resource.name] = get_resource_from_name(resource.name, value)
-        return objective
-
-    else:
-        objective: dict[str, type(BaseResource)] = {
-            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
-            REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
-        }
-        return objective
+    objective: dict[str, type(BaseResource)] = {}
+    objective_layout: QHBoxLayout = gui.objective_resources.local_layout
+    for resource_index in range(objective_layout.count()):
+        resource: ResourceWidget = objective_layout.itemAt(resource_index).widget()
+        if not resource.value.text():
+            value: int = 0
+        else:
+            value: int = int(resource.value.text())
+        objective[resource.name] = get_resource_from_name(resource.name, value)
+    return objective
 
 
 def get_starting_resources(gui: MainWindow) -> dict[str, type(BaseResource)]:
-    if not DEBUG:
-        starting_resources: dict[str, type(BaseResource)] = {}
-        starting_resources_layout: QHBoxLayout = gui.starting_resources.local_layout
-        for resource_index in range(starting_resources_layout.count()):
-            resource: ResourceWidget = starting_resources_layout.itemAt(resource_index).widget()
-            if not resource.value.text():
-                value: int = 0
-            else:
-                value: int = int(resource.value.text())
-            starting_resources[resource.name] = get_resource_from_name(resource.name, value)
-        return starting_resources
-
-    else:
-        starting_resources: dict[str, type(BaseResource)] = {
-            REGULAR_RESOURCE_NAMES["comms"]: Comms(value=1),
-            REGULAR_RESOURCE_NAMES["navs"]: Navs(),
-            REGULAR_RESOURCE_NAMES["data"]: Data(),
-            REGULAR_RESOURCE_NAMES["power"]: Power(value=10),
-
-            SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, 2),
-            SPECIAL_RESOURCE_NAMES["crew"]: Crew(2),
-            SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
-            SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=3)
-        }
-        return starting_resources
+    starting_resources: dict[str, type(BaseResource)] = {}
+    starting_resources_layout: QHBoxLayout = gui.starting_resources.local_layout
+    for resource_index in range(starting_resources_layout.count()):
+        resource: ResourceWidget = starting_resources_layout.itemAt(resource_index).widget()
+        if not resource.value.text():
+            value: int = 0
+        else:
+            value: int = int(resource.value.text())
+        starting_resources[resource.name] = get_resource_from_name(resource.name, value)
+    return starting_resources
 
 
 def get_available_commands(gui: MainWindow) -> dict[str, Command]:
-    if not DEBUG:
-        available_commands: dict[str, Command] = {}
-        commands_layout: QFormLayout = gui.available_commands_widget.local_layout
-        for row_index in range(commands_layout.rowCount()):
-            row: CommandLineWidget = commands_layout.itemAt(row_index).widget()
-            if row.is_active:
-                input_resources: dict[str, type(BaseResource)] = {}
-                for input_resource_index in range(row.input_resource_list.local_layout.count()):
-                    input_resource: ResourceWidget =\
-                        row.input_resource_list.local_layout.itemAt(input_resource_index).widget()
-                    if not input_resource.value.text():
-                        input_value: int = 0
-                    else:
-                        input_value: int = int(input_resource.value.text())
-                    input_resources[input_resource.name]: type(BaseResource) =\
-                        get_resource_from_name(input_resource.name, input_value)
+    available_commands: dict[str, Command] = {}
+    commands_layout: QFormLayout = gui.available_commands_widget.local_layout
+    for row_index in range(commands_layout.rowCount()):
+        row: CommandLineWidget = commands_layout.itemAt(row_index).widget()
+        if row.is_active:
+            input_resources: dict[str, type(BaseResource)] = {}
+            for input_resource_index in range(row.input_resource_list.local_layout.count()):
+                input_resource: ResourceWidget = \
+                    row.input_resource_list.local_layout.itemAt(input_resource_index).widget()
+                if not input_resource.value.text():
+                    input_value: int = 0
+                else:
+                    input_value: int = int(input_resource.value.text())
+                input_resources[input_resource.name]: type(BaseResource) = \
+                    get_resource_from_name(input_resource.name, input_value)
 
-                output_resources: dict[str, type(BaseResource)] = {}
-                for output_resource_index in range(row.output_resource_list.local_layout.count()):
-                    output_resource: ResourceWidget =\
-                        row.output_resource_list.local_layout.itemAt(output_resource_index).widget()
-                    if not output_resource.value.text():
-                        output_value: int = 0
-                    else:
-                        output_value: int = int(output_resource.value.text())
-                    output_resources[output_resource.name]: type(BaseResource) =\
-                        get_resource_from_name(output_resource.name, output_value)
+            output_resources: dict[str, type(BaseResource)] = {}
+            for output_resource_index in range(row.output_resource_list.local_layout.count()):
+                output_resource: ResourceWidget = \
+                    row.output_resource_list.local_layout.itemAt(output_resource_index).widget()
+                if not output_resource.value.text():
+                    output_value: int = 0
+                else:
+                    output_value: int = int(output_resource.value.text())
+                output_resources[output_resource.name]: type(BaseResource) = \
+                    get_resource_from_name(output_resource.name, output_value)
 
-                command: Command = Command(row.command_name.text(), input_resources, output_resources)
-                available_commands[row.command_name.text()]: Command = command
-        return available_commands
-
-    else:
-        available_commands: dict[str, Command] = {
-            "Power to comms": Command("Power to comms",
-                                      {
-                                          REGULAR_RESOURCE_NAMES["power"]: Power(value=1),
-                                      },
-                                      {
-                                          REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
-                                      }
-                                      ),
-
-            "Comms and power to navs": Command("Comms and power to navs",
-                                               {
-                                                   REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2),
-                                                   REGULAR_RESOURCE_NAMES["power"]: Power(value=1)
-                                               },
-                                               {
-                                                   REGULAR_RESOURCE_NAMES["navs"]: Navs(value=5)
-                                               }
-                                               ),
-
-            "Navs to data and comms": Command("Navs to data and comms",
-                                              {
-                                                  REGULAR_RESOURCE_NAMES["navs"]: Navs(value=3)
-                                              },
-                                              {
-                                                  REGULAR_RESOURCE_NAMES["data"]: Data(value=2),
-                                                  REGULAR_RESOURCE_NAMES["comms"]: Comms(value=2)
-                                              }
-                                              ),
-            "Heat to power": Command("Heat to power",
-                                     {
-                                         SPECIAL_RESOURCE_NAMES["heat"]: Heat(4, 1, 3, value=2)
-                                     },
-                                     {
-                                         REGULAR_RESOURCE_NAMES["power"]: Data(value=2)
-                                     }
-                                     ),
-            "Crew and data to navs": Command("Crew and data to navs",
-                                             {
-                                                 SPECIAL_RESOURCE_NAMES["crew"]: Navs(value=2),
-                                                 REGULAR_RESOURCE_NAMES["data"]: Data(value=2)
-                                             },
-                                             {
-                                                 REGULAR_RESOURCE_NAMES["navs"]: Navs(value=8)
-                                             }
-                                             ),
-            "Drift to data": Command("Drift to data",
-                                     {
-                                         SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=-1)
-                                     },
-                                     {
-                                         REGULAR_RESOURCE_NAMES["data"]: Data(value=3)
-                                     }
-                                     ),
-            "Power to thrust and drift": Command("Power to thrust and drift",
-                                                 {
-                                                     REGULAR_RESOURCE_NAMES["power"]: Power(value=2)
-                                                 },
-                                                 {
-                                                     SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=1),
-                                                     SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=1)
-                                                 }
-                                                 )
-        }
-        return available_commands
+            command: Command = Command(row.command_name.text(), input_resources, output_resources)
+            available_commands[row.command_name.text()]: Command = command
+    return available_commands
 
 
 ''' # TODO: Depreceated
@@ -474,7 +464,6 @@ def list_available_resource_types(list_of_names: dict[str, str]) -> None:
         output_string += str(resource_type_index) + ": " + list(list_of_names.items())[resource_type_index][1] + "\n"
     print(output_string)
 '''
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
