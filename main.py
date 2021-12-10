@@ -155,6 +155,7 @@ class CommandLineWidget(QGroupBox):
 
 class ResourcesListWidget(QGroupBox):
     def __init__(self, name: str, parent: QWidget, readonly: bool = False):
+        self.readonly = readonly
         resource_names: list[str] = list(REGULAR_RESOURCE_NAMES.values()) + list(SPECIAL_RESOURCE_NAMES.values())
         super(ResourcesListWidget, self).__init__(name, parent=parent)
         self.local_layout = QHBoxLayout()
