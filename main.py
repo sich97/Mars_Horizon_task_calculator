@@ -12,6 +12,8 @@ from data_structure import Command, Route, BaseResource, REGULAR_RESOURCE_NAMES,
 
 DEBUG = True
 
+# TODO: Heat is still calculated for some reason. Have to find a solution to have the certain resources not calculate each round if they're not a part of the task
+
 
 class MainWindow(QMainWindow):
     # TODO: Implement a way to prevent user input when calculating
