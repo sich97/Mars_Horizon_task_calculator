@@ -162,11 +162,11 @@ class MainWindow(QMainWindow):
                     SPECIAL_RESOURCE_NAMES["drift"]: Drift([-2, 2], -4, 4, value=2),
                     SPECIAL_RESOURCE_NAMES["thrust"]: Thrust(4, value=3)
                 },
-                "amount_of_turns": 3,
+                "amount_of_turns": 2,
                 "commands_per_turn": 3,
                 "objective": {
-                    REGULAR_RESOURCE_NAMES["comms"]: Comms(value=10),
-                    REGULAR_RESOURCE_NAMES["navs"]: Navs(value=10)
+                    REGULAR_RESOURCE_NAMES["comms"]: Comms(value=7),
+                    REGULAR_RESOURCE_NAMES["navs"]: Navs(value=7)
                 },
                 "gui": self
             }
@@ -177,6 +177,7 @@ class MainWindow(QMainWindow):
         self.output_field.setText("Done: " + str(len(valid_routes)))
         self.calculate_button.setText("Calculate")
         QApplication.processEvents()
+        print()
 
 
 class SingularIntInput(QWidget):
