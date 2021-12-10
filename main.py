@@ -179,7 +179,8 @@ class ResourceWidget(QWidget):
         self.value = QLineEdit()
         self.value.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.value.setText(str(value))
-        self.value.setValidator(QRegExpValidator(QRegExp("^[0-9]+$"))) # TODO: Tillat negative tall for drift (hvis dette stemmer med spillet)
+        self.value.setValidator(QRegExpValidator(
+            QRegExp("^[0-9]+$")))  # TODO: Tillat negative tall for drift (hvis dette stemmer med spillet)
         self.value.setReadOnly(readonly)
         self.local_layout.addWidget(self.value)
 
