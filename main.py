@@ -13,9 +13,6 @@ from data_structure import Command, Route, BaseResource, REGULAR_RESOURCE_NAMES,
 DEBUG = True
 
 
-# TODO: The calculator does not calculate correctly anymore. This is due to the change to GUI, because I did not change anything about the calculator itself. Inspecting the variables coming out from the GUI is a good start.
-
-
 class MainWindow(QMainWindow):
     # TODO: Implement a way to prevent user input when calculating
     def __init__(self, parent=None):
